@@ -32,7 +32,7 @@
 
   <repositories>
     <repository>
-      <id>eclipse.${eclipse.codename}</id>
+      <id>eclipse.${eclipse.codename}.noproxy</id>
       <name>Eclipse p2 repository</name>
       <layout>p2</layout>
       <url>${repo.eclipse}</url>
@@ -41,7 +41,7 @@
       </snapshots>
     </repository>
     <repository>
-      <id>ajdt.${eclipse.codename}</id>
+      <id>ajdt.${eclipse.codename}.noproxy</id>
       <name>AJDT for Eclipse p2 repository</name>
       <layout>p2</layout>
       <url>${repo.ajdt}</url>
@@ -50,19 +50,19 @@
       </snapshots>
     </repository>
     <repository>
-      <id>scala-refactoring</id>
+      <id>scala-refactoring.noproxy</id>
       <name>Scala Refactoring p2 repository</name>
       <layout>p2</layout>
       <url>${repo.scala-refactoring}</url>
     </repository>
     <repository>
-      <id>scalariform</id>
+      <id>scalariform.noproxy</id>
       <name>Scalariform Scala p2 repository</name>
       <layout>p2</layout>
       <url>${repo.scalariform}</url>
     </repository>
     <repository>
-      <id>equinox.launcher</id>
+      <id>equinox.launcher.noproxy</id>
       <name>Equinox weaving launcher p2 repository</name>
       <layout>p2</layout>
       <url>${repo.equinox.launcher}</url>
