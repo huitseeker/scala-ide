@@ -39,7 +39,7 @@ class PresentationCompilerTest {
             val overrideIndicatorBuilder = new compiler.OverrideIndicatorBuilderTraverser(unit, new java.util.HashMap) {
               override val eclipseLog = mockLogger
             }
-            // if the unit is not kept loaded (i.e., `keepLoaded = false`), then a message 
+            // if the unit is not kept loaded (i.e., `keepLoaded = false`), then a message
             // "Error creating override indicators" is reported. That is why this test checks
             // that no error is reported to the mocked logger.
             overrideIndicatorBuilder.traverse(tree)
@@ -53,6 +53,8 @@ class PresentationCompilerTest {
   }
 
   @Test
+  // garillot: deactivated pending copy of test architecture
+  @Ignore("Enable this test once headless triggering of Reconciler is possible")
   def freshFileReportsErrors() {
     val contentsWithErrors = """
 package t1001094
@@ -77,7 +79,7 @@ class FreshFile {
 
     // then
     val dataFlowUnit = open("t1000647/bar/DataFlow.scala")
-    
+
     // give a chance to the background compiler to report the error
     waitUntilTypechecked(dataFlowUnit)
 
@@ -94,7 +96,7 @@ class FreshFile {
     // verify
     assertNoErrors(unit)
   }
-  
+
   @Ignore("Ticket #1000692 is fixed (at least it looks like it is working). However this test it is still failing. "+
       "We decided to look at it and understand why it is not passing only after 2.0 release.")
   @Test
@@ -104,32 +106,32 @@ class FreshFile {
     val oracle = List(Link("class t1000692.akka.config.ModuleNotAvailableException"))
     //then
     // it is important to ask hyperlinking before reloading!
-    loadTestUnit(unit).andCheckAgainst(oracle) 
+    loadTestUnit(unit).andCheckAgainst(oracle)
     reload(unit)
     // verify
     assertNoErrors(unit)
   }
-  
+
   @Test
   def psShouldReportTheCorrectCompilationUnitsItKnowsAbout() {
     def managedUnits() = project.withPresentationCompiler(_.compilationUnits)()
-    
+
     project.shutDownCompilers()
-    
+
     // should be empty
     Assert.assertTrue("Presentation compiler should not maintain any units after a shutdown request", managedUnits().isEmpty)
-    
+
     val cu = scalaCompilationUnit("t1000692/akka/util/ReflectiveAccess.scala")
-    
+
     // still no units should be loaded
     Assert.assertTrue("Presentation compiler should not maintain any units after structure build (%s)".format(managedUnits()), managedUnits().isEmpty)
-    
+
     cu.scheduleReconcile().get
 
     // now the unit should be managed
     Assert.assertEquals("Presentation compiler should maintain one unit after reload (%s)".format(managedUnits()), 1, managedUnits().size)
   }
-  
+
   @Test
   @Ignore("Enable this test once #1000976 is fixed")
   def correctlyTypecheckClassesWithDefaultArguments_t1000976() {
@@ -140,15 +142,15 @@ class FreshFile {
       unit
     }
 
-    // SUT: Opening A.scala w/ full typecheck and then B.scala determines the "ghost error" to show up 
+    // SUT: Opening A.scala w/ full typecheck and then B.scala determines the "ghost error" to show up
     openUnitAndTypecheck("t1000976/a/A.scala")
     val unitB = openUnitAndTypecheck("t1000976/b/B.scala")
 
     // verify
     assertNoErrors(unitB)
   }
-  
-  
+
+
   @Test
   def uniqueParseTree_t1001326() {
 
@@ -166,7 +168,7 @@ class FreshFile {
   def unattributedParseTree_t1001326() {
     val cu = scalaCompilationUnit("t1001326/ParsedTree.scala")
     val noSymbols = project.withSourceFile(cu) { (sf, c) =>
-      noSymbolsOrTypes(new CompilerAndTree { 
+      noSymbolsOrTypes(new CompilerAndTree {
         val compiler = c
         val tree = compiler.parseTree(sf)
       })
@@ -180,7 +182,7 @@ class FreshFile {
     val cu = scalaCompilationUnit(path)
 
     val notChanged = project.withSourceFile(cu) { (sf, c) =>
-      val compilerAndTree = new CompilerAndTree { 
+      val compilerAndTree = new CompilerAndTree {
         val compiler = c
         val tree = compiler.parseTree(sf)
       }
