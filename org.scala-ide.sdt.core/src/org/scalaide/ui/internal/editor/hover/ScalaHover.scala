@@ -5,6 +5,7 @@ import org.eclipse.core.resources.IMarker
 import org.eclipse.core.resources.IResource
 import org.eclipse.jdt.core.compiler.IProblem
 import org.eclipse.jface.internal.text.html.HTMLPrinter
+import org.eclipse.jface.text.DefaultInformationControl
 import org.eclipse.jface.text.IInformationControlCreator
 import org.eclipse.jface.text.IRegion
 import org.eclipse.jface.text.ITextHover
@@ -12,9 +13,12 @@ import org.eclipse.jface.text.ITextHoverExtension
 import org.eclipse.jface.text.ITextHoverExtension2
 import org.eclipse.jface.text.ITextViewer
 import org.eclipse.swt.widgets.Display
+import org.eclipse.swt.SWT
+import org.eclipse.swt.widgets.Shell
 import org.scalaide.core.IScalaPlugin
 import org.scalaide.core.compiler.InteractiveCompilationUnit
 import org.scalaide.core.compiler.IScalaPresentationCompiler.Implicits._
+import org.scalaide.core.internal.compiler.ScalaPresentationCompiler
 import org.scalaide.core.resources.ScalaMarkers
 import org.scalaide.logging.HasLogger
 import org.scalaide.util.internal.ScalaWordFinder
@@ -23,6 +27,7 @@ import org.scalaide.util.internal.eclipse.OSGiUtils
 import org.scalaide.util.internal.eclipse.RegionUtils
 import org.scalaide.util.internal.ui.DisplayThread
 import org.scalaide.core.SdtConstants
+import org.eclipse.jface.internal.text.html.BrowserInput
 
 object ScalaHover extends HasLogger {
   /** could return null, but prefer to return empty (see API of ITextHover). */
@@ -105,22 +110,43 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
 
   override def getHoverInfo(viewer: ITextViewer, region: IRegion) = {
     icu.withSourceFile({ (src, compiler) =>
-      import compiler.{stringToTermName => _, stringToTypeName => _, _}
+      // TODO : API compliance
+      val scompiler = compiler.asInstanceOf[ScalaPresentationCompiler]
+      import scompiler._
       import RegionUtils._
       import HTMLPrinter._
 
-      def typeInfo(t: Tree): Option[String] = asyncExec {
-        def compose(ss: List[String]): String = ss.filter(_.nonEmpty).mkString(" ")
+      def typeInfo(t: Tree): Option[Object] = {
+        val askedOpt = asyncExec {
+        def compose(ss: List[String]): String = ss.filterNot(_.isEmpty).mkString(" ")
         def defString(sym: Symbol, tpe: Type): String = {
-          // NoType is returned for defining occurrences, in this case we want to display symbol info itself.
-          val tpeinfo = if (tpe ne NoType) tpe.widen else sym.info
           compose(List(sym.flagString(Flags.ExplicitFlags), sym.keyString, sym.varianceString + sym.nameString +
-            sym.infoString(tpeinfo)))
+            sym.infoString(tpe)))
         }
+          for (tsym <- Option(t.symbol)) yield {
+            def pre(t: Tree): Type = t match {
+              case Apply(fun, _) => pre(fun)
+              case Select(qual, _) => qual.tpe
+              case _ => ThisType(tsym.enclClass)
+            }
+            val pt = pre(t)
+            val site = pt.typeSymbol
+            val sym = if(tsym.isCaseApplyOrUnapply) site else tsym
+            val header = if (sym.isClass || sym.isModule) sym.fullName else {
+              val tpe = sym.tpe.asSeenFrom(pt.widen, site)
+              defString(sym, tpe)
+            }
+            (sym, site, header)
+          }
+        }.getOption().flatten
 
-        for (sym <- Option(t.symbol); tpe <- Option(t.tpe))
-          yield if (sym.isClass || sym.isModule) sym.fullName else defString(sym, tpe)
-      }.getOrElse(None)()
+        for ((sym, site, header) <- askedOpt) yield
+          browserInput(sym, site, header) getOrElse {
+            val html = "<html><body><b>" + header + "</b></body></html>"
+            new scompiler.BrowserInput(html, sym)
+          }
+      }
+
 
       def typecheckingErrorMessage(problems: Seq[IProblem]) = {
         createHtmlOutput { sb =>
@@ -149,9 +175,14 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
       }
 
       def typeMessage = {
-        val tree = askTypeAt(region.toRangePos(src)).getOption()
+        val wordPos = region.toRangePos(src)
+        val pos = unitOfFile(src.file).body find {
+          case Apply(fun, _) if fun.pos.endOrPoint == wordPos.end => true
+          case _ => false
+        } map (_.pos) getOrElse wordPos
+        val tree = askTypeAt(pos).getOption()
 
-        val content = tree.flatMap(typeInfo).getOrElse("")
+        val content = tree.flatMap(typeInfo).map(_.toString).getOrElse("")
         if (content.isEmpty())
           NoHoverInfo
         else
@@ -210,7 +241,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
     }) getOrElse NoHoverInfo
   }
 
-  override def getHoverRegion(viewer: ITextViewer, offset: Int) = {
+  def getHoverRegion(viewer: ITextViewer, offset: Int) = {
     ScalaWordFinder.findWord(viewer.getDocument, offset)
   }
 

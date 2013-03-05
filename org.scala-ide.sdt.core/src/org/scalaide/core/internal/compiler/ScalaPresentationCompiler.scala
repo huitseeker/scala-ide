@@ -47,6 +47,7 @@ import org.scalaide.core.internal.jdt.model.ScalaStructureBuilder
 import org.scalaide.core.compiler.IScalaPresentationCompiler.Implicits._
 import org.scalaide.core.compiler._
 import org.scalaide.core.compiler.IScalaPresentationCompiler._
+import org.scalaide.core.internal.compiler.Scaladoc
 
 class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) extends {
   /*
@@ -67,8 +68,10 @@ class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) 
   with JavaSig
   with LocateSymbol
   with CompilerApiExtensions
-  with IScalaPresentationCompiler
-  with HasLogger { self =>
+  with HasLogger
+  with Scaladoc { self =>
+
+  override def forScaladoc = true
 
   def presentationReporter = reporter.asInstanceOf[ScalaPresentationCompiler.PresentationReporter]
   presentationReporter.compiler = this
@@ -377,6 +380,8 @@ class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) 
       } else scalaParamNames
     }
 
+    val docFun = () => browserInput(sym, sym.enclClass) // TODO: proper site. How?
+
     CompletionProposal(
       kind,
       context,
@@ -389,7 +394,8 @@ class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) 
       getParamNames,
       paramTypes,
       sym.fullName,
-      false)
+      false,
+      docFun)
   }
 
   override def inform(msg: String): Unit =

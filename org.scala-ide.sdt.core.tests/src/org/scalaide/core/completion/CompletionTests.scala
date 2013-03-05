@@ -17,6 +17,10 @@ import org.eclipse.jdt.core.search.TypeNameRequestor
 import org.eclipse.jdt.core.IJavaElement
 import org.junit.Ignore
 import scala.reflect.internal.util.OffsetPosition
+import org.scalaide.core.completion.ScalaCompletions
+import org.scalaide.core.completion.CompletionProposal
+import org.scalaide.core.completion.MemberKind
+import org.scalaide.core.completion.CompletionContext
 
 object CompletionTests extends TestProjectSetup("completion")
 
