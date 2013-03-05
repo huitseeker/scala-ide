@@ -1,20 +1,23 @@
 package org.scalaide.core.testsetup
 
-import org.eclipse.core.runtime.Path
-import org.eclipse.jdt.core.IPackageFragmentRoot
-import org.eclipse.jdt.core.JavaCore
-import org.junit.Assert.assertNotNull
-import org.scalaide.core.internal.project.ScalaProject
-import org.eclipse.jdt.core.ICompilationUnit
-import org.scalaide.core.internal.jdt.model.ScalaSourceFile
-import org.scalaide.core.internal.jdt.model.ScalaCompilationUnit
-import org.eclipse.jdt.core.IProblemRequestor
-import org.eclipse.jdt.core.WorkingCopyOwner
+import scala.tools.nsc.interactive.Response
+
+import org.eclipse.core.resources.IFile
 import org.eclipse.core.runtime.NullProgressMonitor
+import org.eclipse.core.runtime.Path
+import org.eclipse.jdt.core.ICompilationUnit
+import org.eclipse.jdt.core.IPackageFragmentRoot
+import org.eclipse.jdt.core.IProblemRequestor
+import org.eclipse.jdt.core.JavaCore
+import org.eclipse.jdt.core.WorkingCopyOwner
+import org.junit.Assert.assertNotNull
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.when
-import org.eclipse.core.resources.IFile
 import org.scalaide.core.EclipseUserSimulator
+import org.scalaide.core.compiler.InteractiveCompilationUnit
+import org.scalaide.core.internal.jdt.model.ScalaCompilationUnit
+import org.scalaide.core.internal.jdt.model.ScalaSourceFile
+import org.scalaide.core.internal.project.ScalaProject
 
 /** Base class for setting up tests that depend on a project found in the test-workspace.
  *
@@ -75,13 +78,21 @@ class TestProjectSetup(projectName: String, srcRoot: String = "/%s/src/", val bu
     new EclipseUserSimulator().createCompilationUnit(pack, unitName, contents).asInstanceOf[ScalaSourceFile]
   }
 
-  def reload(unit: ScalaCompilationUnit) {
+  def reload(unit: InteractiveCompilationUnit) {
     // first, 'open' the file by telling the compiler to load it
     unit.withSourceFile { (src, compiler) =>
       val dummy = new compiler.Response[Unit]
       compiler.askReload(List(src), dummy)
       dummy.get
     }
+  }
+
+  def parseAndEnter(unit: InteractiveCompilationUnit) {
+    project.withSourceFile(unit) { (src, compiler) =>
+      val dummy = new compiler.Response[compiler.Tree]
+      compiler.askParsedEntered(src, false, dummy)
+      dummy.get
+    }()
   }
 
   def findMarker(marker: String) = SDTTestUtils.findMarker(marker)

@@ -6,12 +6,12 @@ import org.scalaide.core.compiler.ScalaPresentationCompiler
 import org.scalaide.logging.HasLogger
 import org.scalaide.core.internal.decorators.semantichighlighting.classifier.SymbolTypes._
 import scala.tools.nsc.io.AbstractFile
-import scala.tools.nsc.util.RangePosition
 import scala.reflect.internal.util.SourceFile
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.jface.text.IRegion
 import org.eclipse.jface.text.Region
 import org.scalaide.util.internal.eclipse.RegionOps._
+import scala.reflect.internal.util.RangePosition
 
 private object SymbolClassification {
 
@@ -62,7 +62,7 @@ class SymbolClassification(protected val sourceFile: SourceFile, val global: Sca
       def getSymbolInfo(symbolType: SymbolType, sym: Symbol, region: Option[IRegion]): SymbolInfo = {
         val inInterpolatedString = region.map(syntacticInfo.identifiersInStringInterpolations).getOrElse(false)
         // isDeprecated may trigger type completion for annotations
-        val deprecated = sym.annotations.nonEmpty && global.askOption(() => sym.isDeprecated).getOrElse(false)
+        val deprecated = sym.annotations.nonEmpty && askOption(() => sym.isDeprecated).getOrElse(false)
         SymbolInfo(symbolType, region.toList, deprecated, inInterpolatedString)
       }
 
@@ -72,7 +72,7 @@ class SymbolClassification(protected val sourceFile: SourceFile, val global: Sca
 
         findDynamicMethodCall(t) map {
           case (symbolType, pos) =>
-            val sym = global.askOption(() => t.symbol).getOrElse(NoSymbol)
+            val sym = askOption(() => t.symbol).getOrElse(NoSymbol)
             getSymbolInfo(symbolType, sym, Some(posToRegion(pos)))
         }
       }
@@ -86,7 +86,7 @@ class SymbolClassification(protected val sourceFile: SourceFile, val global: Sca
       var symbolInfos = IndexedSeq.empty[SymbolInfo]
       new Traverser {
         override def traverse(t: Tree): Unit = {
-          def symExists = global.askOption(() => t.symbol != NoSymbol).getOrElse(false)
+          def symExists = askOption(() => t.symbol != NoSymbol).getOrElse(false)
 
           if (!progressMonitor.isCanceled() && isSourceTree(t) && (t.hasSymbolField || t.isType || symExists)) {
             val ds = findDynamicInfo(t)

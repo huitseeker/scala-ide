@@ -42,6 +42,7 @@ import org.scalaide.core.api.ScalaProject
 import org.scalaide.core.ScalaPlugin
 import org.scalaide.util.internal.ScalaWordFinder
 import scalariform.lexer.{ScalaLexer, ScalaLexerException}
+import org.scalaide.core.Scaladoc
 
 class ScalaPresentationCompiler(val project: ScalaProject, settings: Settings) extends {
   /*
@@ -62,7 +63,10 @@ class ScalaPresentationCompiler(val project: ScalaProject, settings: Settings) e
   with JavaSig
   with LocateSymbol
   with CompilerApiExtensions
-  with HasLogger { self =>
+  with HasLogger
+  with Scaladoc { self =>
+
+  override def forScaladoc = true
 
   def presentationReporter = reporter.asInstanceOf[ScalaPresentationCompiler.PresentationReporter]
   presentationReporter.compiler = this
@@ -417,6 +421,8 @@ class ScalaPresentationCompiler(val project: ScalaProject, settings: Settings) e
       } else scalaParamNames
     }
 
+    val docFun = () => browserInput(sym, sym.enclClass) // TODO: proper site. How?
+
     CompletionProposal(
       kind,
       context,
@@ -429,7 +435,8 @@ class ScalaPresentationCompiler(val project: ScalaProject, settings: Settings) e
       getParamNames,
       paramTypes,
       sym.fullName,
-      false)
+      false,
+      docFun)
   }
 
   override def inform(msg: String): Unit =

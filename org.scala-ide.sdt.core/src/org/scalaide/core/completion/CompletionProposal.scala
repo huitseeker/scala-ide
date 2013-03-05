@@ -60,7 +60,8 @@ case class CompletionProposal(
   getParamNames: () => List[List[String]], // parameter names (excluding any implicit parameter sections)
   paramTypes: List[List[String]],          // parameter types matching parameter names (excluding implicit parameter sections)
   fullyQualifiedName: String, // for Class, Trait, Type, Objects: the fully qualified name
-  needImport: Boolean        // for Class, Trait, Type, Objects: import statement has to be added
+  needImport: Boolean,        // for Class, Trait, Type, Objects: import statement has to be added
+  documentation: () => Option[Object]  // on-demand generate documentation HTML.
 ) {
 
   /** `getParamNames` is expensive, save this result once computed.
