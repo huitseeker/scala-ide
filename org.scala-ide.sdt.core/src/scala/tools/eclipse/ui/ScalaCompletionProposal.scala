@@ -2,12 +2,12 @@ package scala.tools.eclipse
 package ui
 
 import completion._
+import org.eclipse.jdt.ui.PreferenceConstants
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension6
-import org.eclipse.jface.text.contentassist.IContextInformation
+import org.eclipse.jface.text.contentassist.{CompletionProposal => _, _}
 import org.eclipse.swt.graphics.Image
 import org.eclipse.jface.text.IDocument
+import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.jface.viewers.ISelectionProvider
 import org.eclipse.jface.viewers.StyledString
 import org.eclipse.jface.text.TextSelection
@@ -16,6 +16,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages
 import refactoring.EditorHelpers
 import refactoring.EditorHelpers._
 import scala.tools.refactoring.implementations.AddImportStatement
+import org.eclipse.jface.text.DefaultInformationControl
 import org.eclipse.jface.text.link._
 import org.eclipse.jface.text.Position
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI
@@ -38,6 +39,8 @@ import org.eclipse.jface.text.ITextViewerExtension2
 import org.eclipse.jface.text.ITextViewerExtension5
 import org.eclipse.jface.text.DocumentEvent
 import org.eclipse.jface.text.IRegion
+import org.eclipse.jface.text.IInformationControlCreator
+import org.eclipse.swt.graphics.Point
 
 /** A UI class for displaying completion proposals.
  *
@@ -45,10 +48,8 @@ import org.eclipse.jface.text.IRegion
  *  between them.
  */
 class ScalaCompletionProposal(proposal: CompletionProposal, selectionProvider: ISelectionProvider)
-  extends IJavaCompletionProposal
-  with ICompletionProposalExtension
-  with ICompletionProposalExtension2
-  with ICompletionProposalExtension6 {
+    extends IJavaCompletionProposal with ICompletionProposalExtension with ICompletionProposalExtension2
+    with ICompletionProposalExtension3 with ICompletionProposalExtension5 with ICompletionProposalExtension6 {
 
   import proposal._
   import ScalaCompletionProposal._
@@ -56,7 +57,7 @@ class ScalaCompletionProposal(proposal: CompletionProposal, selectionProvider: I
   private var cachedStyleRange: StyleRange = null
   private val ScalaProposalCategory = "ScalaProposal"
 
-  def getRelevance = relevance
+  override def getRelevance: Int = relevance
 
   private lazy val image = {
     import MemberKind._
@@ -75,7 +76,7 @@ class ScalaCompletionProposal(proposal: CompletionProposal, selectionProvider: I
     }
   }
 
-  def getImage = image
+  override def getImage: Image = image
 
   /** `getParamNames` is expensive, save this result once computed.
    *
@@ -105,18 +106,18 @@ class ScalaCompletionProposal(proposal: CompletionProposal, selectionProvider: I
   val startOfArgumentList = startPos + completion.length + 1
 
   /** The information that is displayed in a small hover window above the completion, showing parameter names and types. */
-  def getContextInformation(): IContextInformation =
+  override def getContextInformation(): IContextInformation =
     if (tooltip.length > 0)
       new ScalaContextInformation(display, tooltip, image, startOfArgumentList)
     else null
 
   /** A simple display string
    */
-  def getDisplayString() = display
+  override def getDisplayString(): String = display
 
   /** A display string with grayed out extra details
    */
-  def getStyledDisplayString(): StyledString = {
+  override def getStyledDisplayString(): StyledString = {
     val styledString = new StyledString(display)
     if (displayDetail != null && displayDetail.length > 0)
       styledString.append(" - ", StyledString.QUALIFIER_STYLER).append(displayDetail, StyledString.QUALIFIER_STYLER)
@@ -125,15 +126,17 @@ class ScalaCompletionProposal(proposal: CompletionProposal, selectionProvider: I
 
   /** Some additional info (like javadoc ...)
    */
-  def getAdditionalProposalInfo() = null
-  def getSelection(d: IDocument) = null
-  def apply(d: IDocument) { throw new IllegalStateException("Shouldn't be called") }
+  override def getAdditionalProposalInfo(): String = null  // Rather the next method is called.
+  override def getAdditionalProposalInfo(monitor: IProgressMonitor): AnyRef = proposal.documentation() orNull
+
+  override def getSelection(d: IDocument): Point = null
+  override def apply(d: IDocument) { throw new IllegalStateException("Shouldn't be called") }
 
   def apply(d: IDocument, trigger: Char, offset: Int) {
     throw new IllegalStateException("Shouldn't be called")
   }
 
-  def apply(viewer: ITextViewer, trigger: Char, stateMask: Int, offset: Int): Unit = {
+  override def apply(viewer: ITextViewer, trigger: Char, stateMask: Int, offset: Int): Unit = {
     val d: IDocument = viewer.getDocument()
     val overwrite = !insertCompletion ^ ((stateMask & SWT.CTRL) != 0)
 
@@ -249,6 +252,13 @@ class ScalaCompletionProposal(proposal: CompletionProposal, selectionProvider: I
     ui
   }
 
+  // ICompletionProposalExtension3
+  override def getInformationControlCreator: IInformationControlCreator = BrowserControlCreator()
+
+  override def getPrefixCompletionStart(d: IDocument, offset: Int): Int = startPos
+  override def getPrefixCompletionText(d: IDocument, offset: Int): CharSequence = null
+
+
   /** Highlight the part of the text that would be overwritten by the current selection
    */
   override def selected(viewer: ITextViewer, smartToggle: Boolean) {
@@ -349,7 +359,8 @@ object ScalaCompletionProposal {
   val javaClassImage = JavaPluginImages.get(JavaPluginImages.IMG_OBJS_CLASS)
   val packageImage = JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKAGE)
 
-  def apply(selectionProvider: ISelectionProvider)(proposal: CompletionProposal) = new ScalaCompletionProposal(proposal, selectionProvider)
+
+ def apply(selectionProvider: ISelectionProvider)(proposal: CompletionProposal) = new ScalaCompletionProposal(proposal, selectionProvider)
 
   def insertCompletion(): Boolean = {
     val preference = JavaPlugin.getDefault().getPreferenceStore()
@@ -366,4 +377,5 @@ object ScalaCompletionProposal {
   def getForegroundColor(): Color = colorFor(PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND)
 
   def getBackgroundColor(): Color = colorFor(PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND)
-}
+
+ }
