@@ -61,7 +61,11 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
   with JavaSig
   with JVMUtils
   with LocateSymbol
-  with HasLogger { self =>
+  with HasLogger
+  with SymbolsCompatibility
+  with Scaladoc { self =>
+
+  override def forScaladoc = true
 
   def presentationReporter = reporter.asInstanceOf[ScalaPresentationCompiler.PresentationReporter]
   presentationReporter.compiler = this
@@ -323,7 +327,8 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
       } else scalaParamNames
     }
 
-    import scala.tools.eclipse.completion.HasArgs
+    val docFun = () => browserInput(sym, sym.enclClass) // TODO: proper site. How?
+
     CompletionProposal(kind,
       start,
       name,
@@ -334,7 +339,8 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
       getParamNames,
       paramTypes,
       sym.fullName,
-      false)
+      false,
+      docFun)
   }
 
   override def inform(msg: String): Unit =
