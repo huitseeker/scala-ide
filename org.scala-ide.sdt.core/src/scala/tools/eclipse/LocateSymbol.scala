@@ -96,5 +96,4 @@ trait LocateSymbol { self : ScalaPresentationCompiler =>
         else Some(file, p.point)
       }
     }
-  }
 }
