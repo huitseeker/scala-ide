@@ -17,10 +17,16 @@ class ScalaReconcilingStrategy(icuEditor: InteractiveCompilationUnitEditor) exte
 
   private var progressMonitor : IProgressMonitor = _
   private var document: IDocument = _
+
+  /**
+   * The underlying compilation unit, in general implemented by a ScalaSourceFile.
+   *
+   * @note This member is a def, not a lazy val, to avoid doc/reconciler
+   * desynchronizations if the underlying document is swapped.
+   *  (see https://github.com/scala-ide/scala-ide/pull/309#discussion_r3048592)
+   */
   private def icUnit = icuEditor.getInteractiveCompilationUnit()
 
-  // That ain't pretty, but it's the Java way, see org.eclipse,jdt.internal.ui.text.java.JavaReconcilingStrategy
-  private val isTriggerableEditor : Boolean = (icuEditor.isInstanceOf[CompilationUnitEditor])
   private val listeningEditor = icuEditor.asInstanceOf[IJavaReconcilingListener]
 
   override def setDocument(doc: IDocument) {
@@ -36,14 +42,15 @@ class ScalaReconcilingStrategy(icuEditor: InteractiveCompilationUnitEditor) exte
   }
 
   override def reconcile(partition: IRegion) {
-    if (isTriggerableEditor)
-      listeningEditor.aboutToBeReconciled()
+    listeningEditor.aboutToBeReconciled()
     icUnit.scalaProject.doWithPresentationCompiler(_.flushScheduledReloads())
     val errors = icUnit.reconcile(document.get)
     // we only update the edited compilation unit
     icuEditor.updateErrorAnnotations(errors)
-    if (isTriggerableEditor)
-      listeningEditor.reconciled(icUnit.asInstanceOf[CompilationUnit], false, new NullProgressMonitor())
+    // reconciled expects a jdt.core.dom.CompilationUnitEditor as first argument,
+    // which ScalaSourceFileEditor and other ICU Editors aren't
+    // it is possible we starve Java-Side IReconcilingListeners here
+    listeningEditor.reconciled(null, false, new NullProgressMonitor())
   }
 
   override def initialReconcile() {
