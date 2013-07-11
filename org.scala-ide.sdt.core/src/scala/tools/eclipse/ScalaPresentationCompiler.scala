@@ -38,7 +38,6 @@ import org.eclipse.jdt.core.IMethod
 import scala.tools.nsc.io.VirtualFile
 import scala.tools.nsc.interactive.MissingResponse
 
-
 class ScalaPresentationCompiler(val project: ScalaProject, settings: Settings) extends {
   /**
    * Lock object for protecting compiler names. Names are cached in a global `Array[Char]`
@@ -49,7 +48,8 @@ class ScalaPresentationCompiler(val project: ScalaProject, settings: Settings) e
    */
   private val nameLock = new Object
 
-} with Global(settings, new ScalaPresentationCompiler.PresentationReporter, project.underlying.getName)
+} with ScaladocEnabledGlobal(settings, new ScalaPresentationCompiler.PresentationReporter, project.underlying.getName)
+  with ScaladocGlobalCompatibilityTrait
   with ScalaStructureBuilder
   with ScalaIndexBuilder
   with ScalaMatchLocator
@@ -59,10 +59,10 @@ class ScalaPresentationCompiler(val project: ScalaProject, settings: Settings) e
   with JVMUtils
   with LocateSymbol
   with HasLogger
-  with SymbolsCompatibility
   with Scaladoc { self =>
 
   override def forScaladoc = true
+
 
   def presentationReporter = reporter.asInstanceOf[ScalaPresentationCompiler.PresentationReporter]
   presentationReporter.compiler = this
