@@ -48,6 +48,7 @@ import org.scalaide.core.compiler.IScalaPresentationCompiler.Implicits._
 import org.scalaide.core.compiler._
 import org.scalaide.core.compiler.IScalaPresentationCompiler._
 import org.scalaide.core.internal.compiler.Scaladoc
+import org.scalaide.core.internal.compiler.ScaladocGlobalCompatibilityTrait
 
 class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) extends {
   /*
@@ -60,6 +61,7 @@ class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) 
   private val nameLock = new Object
 
 } with Global(settings, new ScalaPresentationCompiler.PresentationReporter, project.underlying.getName)
+  with ScaladocGlobalCompatibilityTrait
   with ScalaStructureBuilder
   with ScalaIndexBuilder
   with ScalaMatchLocator

@@ -183,7 +183,7 @@ class FreshFile {
       import scompiler.{ reload => _, _ }
       import definitions.ListClass
       val unit = asyncExec{scompiler.findCompilationUnit(ListClass).get}.getOption().get
-      reload(unit)
+      reload(unit.asInstanceOf[ScalaCompilationUnit])
       parseAndEnter(unit)
 
       unit.withSourceFile { (source, _) =>

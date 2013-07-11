@@ -41,7 +41,7 @@ class PresentationCompilerDocTest {
         case None => Assert.fail("Couldn't get typed tree")
         case Some(t) =>
           scompiler.parsedDocComment(t.symbol, t.symbol.enclClass) match {
-            case None => Assert.fail("Couldn't get documentation")
+            case None => Assert.fail("Couldn't get documentation for " + t.symbol)
             case Some(comment) => Assert.assertTrue(s"Expectation failed for $comment", expectation(comment))
           }
       }
