@@ -15,6 +15,14 @@ class PresentationCompilerDocTest {
   import PresentationCompilerDocTest._
 
   @Test
+  def basicComment() {
+    val expect: Comment => Boolean = { cmt =>
+      existsText(cmt.body, "This is a todo comment")
+    }
+    doTest(open("clasz.scala"), expect)
+  }
+
+  @Test
   def variableExpansion() {
     val expect: Comment => Boolean = { cmt =>
       existsText(cmt.body, "correctly got derived comment")
@@ -39,7 +47,7 @@ class PresentationCompilerDocTest {
         case None => Assert.fail("Couldn't get typed tree")
         case Some(t) =>
           compiler.parsedDocComment(t.symbol, t.symbol.enclClass) match {
-            case None => Assert.fail("Couldn't get documentation")
+            case None => Assert.fail("Couldn't get documentation for " + t.symbol)
             case Some(comment) => Assert.assertTrue(s"Expectation failed for $comment", expectation(comment))
           }
       }
