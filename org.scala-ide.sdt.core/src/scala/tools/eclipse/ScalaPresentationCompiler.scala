@@ -62,7 +62,6 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
   with JVMUtils
   with LocateSymbol
   with HasLogger
-  with SymbolsCompatibility
   with Scaladoc { self =>
 
   override def forScaladoc = true
