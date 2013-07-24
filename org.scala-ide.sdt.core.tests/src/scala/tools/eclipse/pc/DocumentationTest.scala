@@ -6,6 +6,8 @@ import scala.tools.nsc.doc.base.comment.Comment
 import scala.tools.nsc.interactive.Response
 import scala.reflect.internal.util.{ Position, SourceFile }
 import org.junit._
+import scala.tools.eclipse.properties.PropertyStore
+import scala.tools.eclipse.properties.CompilerSettings
 
 object PresentationCompilerDocTest extends testsetup.TestProjectSetup("pc_doc")
 
@@ -29,6 +31,8 @@ class PresentationCompilerDocTest {
   }
 
   private def doTest(unit: ScalaCompilationUnit, expectation: Comment => Boolean) {
+    enableProjectSettings()
+    setProjectSettings(CompilerSettings.ADDITIONAL_PARAMS, "-Ypresentation-debug")
     project.withSourceFile(unit) { (src, compiler) =>
       val pos = docPosition(src, compiler)
       val response = new Response[compiler.Tree]
@@ -37,7 +41,7 @@ class PresentationCompilerDocTest {
         case None => Assert.fail("Couldn't get typed tree")
         case Some(t) =>
           compiler.parsedDocComment(t.symbol, t.symbol.enclClass) match {
-            case None => Assert.fail("Couldn't get documentation")
+            case None => Assert.fail("Couldn't get documentation for " + t.symbol)
             case Some(comment) => Assert.assertTrue(s"Expectation failed for $comment", expectation(comment))
           }
       }
@@ -58,5 +62,27 @@ class PresentationCompilerDocTest {
     case s: String => s contains text
     case s: Seq[_] => s exists (existsText(_, text))
     case p: Product => p.productIterator exists (existsText(_, text))
+  }
+
+  private def enableProjectSettings(value: Boolean = true) {
+    val projectStore = new PropertyStore(project.underlying, ScalaPlugin.prefStore, ScalaPlugin.plugin.pluginId)
+    projectStore.setValue(SettingConverterUtil.USE_PROJECT_SETTINGS_PREFERENCE, value)
+    projectStore.save()
+  }
+
+  /** Set a workspace-wide setting value. For compiler settings, you need to strip the '-', for instance
+   *  call `setWorkspaceSettings("deprecation", ..") instead of "-deprecation"
+   */
+  private def setWorkspaceSettings(settingName: String, value: String) {
+    ScalaPlugin.prefStore.setValue(settingName, value)
+  }
+
+  /** Set a project-scoped setting value. For compiler settings, you need to strip the '-', for instance
+   *  call `setWorkspaceSettings("deprecation", ..") instead of "-deprecation"
+   */
+  private def setProjectSettings(settingName: String, value: String) {
+    val projectStore = new PropertyStore(project.underlying, ScalaPlugin.prefStore, ScalaPlugin.plugin.pluginId)
+    projectStore.setValue(settingName, value)
+    projectStore.save() // the project store is an in-memory snapshot, needs to be persisted this way
   }
 }

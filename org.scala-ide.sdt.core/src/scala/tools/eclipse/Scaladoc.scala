@@ -65,7 +65,7 @@ trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPre
         } flatMap { fragments =>
           withFragments(fragments, Nil) flatMap {
             case (expanded, raw, pos) if !expanded.isEmpty =>
-              askOption { () => parseAtSymbol(expanded, raw, pos, site) }
+              askOption { () => parseAtSymbol(expanded, raw, pos, Some(site)) }
             case _ =>
               None
           }
