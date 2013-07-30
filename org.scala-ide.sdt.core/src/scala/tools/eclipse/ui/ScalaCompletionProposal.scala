@@ -360,7 +360,7 @@ object ScalaCompletionProposal {
   val packageImage = JavaPluginImages.get(JavaPluginImages.IMG_OBJS_PACKAGE)
 
 
- def apply(selectionProvider: ISelectionProvider)(proposal: CompletionProposal) = new ScalaCompletionProposal(proposal, selectionProvider)
+  def apply(selectionProvider: ISelectionProvider)(proposal: CompletionProposal) = new ScalaCompletionProposal(proposal, selectionProvider)
 
   def insertCompletion(): Boolean = {
     val preference = JavaPlugin.getDefault().getPreferenceStore()
