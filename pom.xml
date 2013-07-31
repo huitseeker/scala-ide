@@ -24,6 +24,8 @@
     <repo.scala-ide.root>http://download.scala-ide.org</repo.scala-ide.root>
 
     <!-- fixed versions -->
+    <sbinary.version>0.4.2-SNAPSHOT</sbinary.version>
+    <jline.version>2.10</jline.version>
     <ivy.version>2.2.0</ivy.version>
     <miglayout.version>3.7.4</miglayout.version>
     <log4j.version>1.2.17</log4j.version>
@@ -57,6 +59,7 @@
      <scala.version>2.10.0</scala.version>
      <scala.era.major.version>2.10</scala.era.major.version>
      <scala.library.version>${scala.version}</scala.library.version>
+     <sbt.compiled.version>${scala.version}</sbt.compiled.version>
      <version.suffix>2_10</version.suffix>
      <version.tag>local</version.tag>
      <sbt.version>0.13.0</sbt.version>
@@ -285,6 +288,86 @@
         <groupId>com.typesafe.sbt</groupId>
         <artifactId>incremental-compiler</artifactId>
         <version>${sbt.ide.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>classpath_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>logging_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>io_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>control_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>classfile_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>process_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>relation_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>interface_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>persist_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>api_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>compiler-integration_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>incremental-compiler_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>compile_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-sbt</groupId>
+        <artifactId>compiler-interface_${sbt.compiled.version}</artifactId>
+        <version>${sbt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>jline</groupId>
+        <artifactId>jline</artifactId>
+        <version>${jline.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.scala-tools.sbinary</groupId>
+        <artifactId>sbinary_${sbt.compiled.version}</artifactId>
+        <version>${sbinary.version}</version>
       </dependency>
       <!-- sdt.core dependencies -->
       <dependency>
