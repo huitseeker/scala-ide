@@ -103,10 +103,8 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
    *  For any CU not tracked by the presentation compiler at schedule time, it's a no-op.
    */
   def flushScheduledReloads() : Response[Unit]= {
-    synchronized {
-      val reloadees = scheduledUnits.toList
-      scheduledUnits.clear()
-    }
+    val reloadees = scheduledUnits.toList
+    scheduledUnits.clear()
 
     val res = new Response[Unit]
     if (reloadees.isEmpty) res.set(())

@@ -6,7 +6,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider.Pr
 import org.eclipse.jdt.core.compiler.IProblem
 import scala.collection.breakOut
 import scala.collection.JavaConverters.mapAsJavaMapConverter
-import scala.tools.eclipse.util.SWTUtils
 import org.eclipse.jface.text.Position
 import org.eclipse.jface.text.ITextViewerExtension2
 import scala.tools.eclipse.ISourceViewerEditor
@@ -23,7 +22,6 @@ trait DecoratedInteractiveEditor extends ISourceViewerEditor {
   /**
    * Update annotations on the editor from a list of IProblems
    */
-
   def updateErrorAnnotations(errors: List[IProblem]) {
     val newAnnotations: Map[ProblemAnnotation, Position] = (for (e <- errors) yield {
       val annotation = new ProblemAnnotation(e, null) // no compilation unit
@@ -41,13 +39,13 @@ trait DecoratedInteractiveEditor extends ISourceViewerEditor {
     if (presViewer.isInstanceOf[ITextViewerExtension2]) {
         // TODO: This should be replaced by a better modularization of semantic highlighting PositionsChange
         val newPositions = newAnnotations.values
-                def end (x:Position) = x.offset + x.length - 1
-                val taintedBounds : (Int, Int) = ((Int.MaxValue, 0) /: newPositions) {(acc, p1) => (Math.min(acc._1, p1.offset), Math.max(acc._2, end(p1)))}
+        def end (x:Position) = x.offset + x.length - 1
+        val taintedBounds : (Int, Int) = ((Int.MaxValue, 0) /: newPositions) {(acc, p1) => (Math.min(acc._1, p1.offset), Math.max(acc._2, end(p1)))}
         val taintedLength = (taintedBounds._2 - taintedBounds._1 +1)
 
-        SWTUtils.asyncExec { presViewer.asInstanceOf[ITextViewerExtension2].invalidateTextPresentation(taintedBounds._1, taintedLength) }
+        DisplayThread.asyncExec { presViewer.asInstanceOf[ITextViewerExtension2].invalidateTextPresentation(taintedBounds._1, taintedLength) }
     } else {
-        SWTUtils.asyncExec { getViewer.invalidateTextPresentation() }
+        DisplayThread.asyncExec { getViewer.invalidateTextPresentation() }
     }
   }
 
