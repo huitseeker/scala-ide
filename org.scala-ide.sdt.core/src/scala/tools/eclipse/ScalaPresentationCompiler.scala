@@ -79,8 +79,12 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
     } yield icu
   }
 
-  /** Schedule all units open handled by this presentation compiler for reconciliation.  */
-  def reconcileOpenUnits() {
+  /** Schedule all units open handled by this presentation
+  compiler for reconciliation.  */
+  @deprecated("use askReloadManagedUnits instead", "4.0.0")
+  def reconcileOpenUnits() = askReloadManagedUnits()
+
+  def askReloadManagedUnits() {
     askReload(compilationUnits)
   }
 
@@ -266,7 +270,7 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
 
     // reconcile the opened editors if some files have been refreshed
     if (notLoadedFiles.nonEmpty)
-      reconcileOpenUnits()
+      askReloadManagedUnits()
   }
 
   override def newTermName(str: String) = {
