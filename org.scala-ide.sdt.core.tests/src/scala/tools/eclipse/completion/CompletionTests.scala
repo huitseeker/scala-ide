@@ -234,7 +234,10 @@ class CompletionTests {
       (index, position, completions) =>
         assertEquals("There is only one completion location", 0, index)
         assertTrue("The completion should return java.util", completions.exists {
-          case prop: CompletionProposal => prop.kind == MemberKind.Package && prop.completion == "util"
+          _ match {
+            case CompletionProposal(MemberKind.Package, _, "util", _, _, _, _, _, _, _, _, _) => true
+            case _ => false
+          }
         })
     }
   }
@@ -263,11 +266,13 @@ class CompletionTests {
         index match {
         case 0 =>
           assertTrue("The completion should return the `buz` method name with empty-parens", completions.exists {
-            case prop: CompletionProposal => prop.kind == MemberKind.Def && prop.completion == "buz" && prop.getParamNames() == List(Nil)
+            case CompletionProposal(MemberKind.Def, _, "buz", _, _, _, _, getParamNames, _, _, _, _) =>
+              getParamNames() == List(Nil) // List(Nil) is how an empty-args list is encoded
         })
         case 1 =>
           assertTrue("The completion should return the `bar` method name with NO empty-parens", completions.exists {
-            case prop: CompletionProposal => prop.kind == MemberKind.Def && prop.completion == "bar" && prop.getParamNames() == Nil
+            case CompletionProposal(MemberKind.Def, _, "bar", _, _, _, _, getParamNames, _, _, _, _) =>
+              getParamNames() == Nil
           })
         case _ =>
           assert(false, "Unhandled completion position")
