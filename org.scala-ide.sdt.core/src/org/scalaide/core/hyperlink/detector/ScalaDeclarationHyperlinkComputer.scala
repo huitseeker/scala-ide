@@ -34,7 +34,7 @@ class ScalaDeclarationHyperlinkComputer extends HasLogger {
 
         val response = new Response[compiler.Tree]
         askTypeAt(pos, response)
-        val symsOpt = response.get.left.toOption.map { tree =>
+        val symsOpt = response.get.left.toOption.flatMap { tree =>
           compiler.askOption { () =>
             tree match {
               case Import(expr, sels) =>
@@ -61,7 +61,7 @@ class ScalaDeclarationHyperlinkComputer extends HasLogger {
               case _                                                => List()
             }
           }
-        }.flatten
+        }
         symsOpt map { syms =>
           syms filterNot { sym => sym == NoSymbol || sym.isPackage || sym.isJavaDefined } flatMap { sym =>
              DeclarationHyperlinkFactory.create(Hyperlink.withText("Open Declaration (%s)".format(sym.toString)), sym, wordRegion)
