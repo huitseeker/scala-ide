@@ -127,7 +127,8 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
             def pre(t: Tree): Type = t match {
               case Apply(fun, _) => pre(fun)
               case Select(qual, _) => qual.tpe
-              case _ => ThisType(tsym.enclClass)
+              case _ if tsym.enclClass ne NoSymbol => ThisType(tsym.enclClass)
+              case _ => NoType
             }
             val pt = pre(t)
             val site = pt.typeSymbol
@@ -177,7 +178,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
       def typeMessage = {
         val wordPos = region.toRangePos(src)
         val pos = unitOfFile(src.file).body find {
-          case Apply(fun, _) if fun.pos.endOrPoint == wordPos.end => true
+          case Apply(fun, _) if fun.pos.isRange && fun.pos.end == wordPos.end => true
           case _ => false
         } map (_.pos) getOrElse wordPos
         val tree = askTypeAt(pos).getOption()
@@ -241,7 +242,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
     }) getOrElse NoHoverInfo
   }
 
-  def getHoverRegion(viewer: ITextViewer, offset: Int) = {
+  override def getHoverRegion(viewer: ITextViewer, offset: Int) = {
     ScalaWordFinder.findWord(viewer.getDocument, offset)
   }
 

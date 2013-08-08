@@ -191,7 +191,7 @@ class FreshFile {
           // Only check if doc comment is present in the class itself.
           // This doesn't include symbols that are inherited from documented symbols.
           // An alternative would be to check allOverriddenSymbols, but
-          // that would require getting sourceFiles for those as well. I'm a bit lazy :)
+          // that would require getting sourceFiles for those as well.
           ListClass.info.decls filter { sym =>
             getUnitOf(source).get.body exists {
               case DocDef(_, defn: DefTree) if defn.name eq sym.name => true

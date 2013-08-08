@@ -33,29 +33,34 @@ trait LocateSymbol { self: ScalaPresentationCompiler =>
   def findCompilationUnit(sym: Symbol): Option[InteractiveCompilationUnit] = {
 
    def enclosingClassForScalaDoc(sym:Symbol): Symbol = {
-      if ((sym.isClass || sym.isModule) && sym.isPackage) sym else sym.enclosingPackageClass
+      if ((sym.isClass || sym.isModule) && sym.hasPackageFlag) sym else sym.enclosingPackageClass
     }
 
     def findClassFile(): Option[InteractiveCompilationUnit] = {
       logger.debug("Looking for a classfile for " + sym.fullName)
-      val packName = enclosingClassForScalaDoc(sym).fullName
       val javaProject = project.javaProject.asInstanceOf[JavaProject]
-      val pfs = new SearchableEnvironment(javaProject, null: WorkingCopyOwner).nameLookup.findPackageFragments(packName, false)
-      if (pfs eq null) None else pfs.toStream flatMap { pf =>
+      val packName = asyncExec { enclosingClassForScalaDoc(sym).fullName }.getOption()
+
+      packName.flatMap { pn =>
         val name = asyncExec {
           val top = sym.enclosingTopLevelClass
           if (sym.owner.isPackageObjectClass) "package$.class" else top.name + (if (top.isModuleClass) "$" else "") + ".class"
         }.getOption()
 
-        logger.debug("Trying out to get " + name)
-        val cf = name map (pf.getClassFile(_))
-        cf match {
-          case Some(classFile: ScalaClassFile) =>
-            logger.debug("Found Scala class file: " + classFile.getElementName)
-            Some(classFile)
-          case _ => None
+        name flatMap { nm =>
+          val pfs = new SearchableEnvironment(javaProject, null: WorkingCopyOwner).nameLookup.findPackageFragments(pn, false)
+          if (pfs eq null) None else pfs.toStream flatMap { pf =>
+            logger.debug("Trying out to get " + name)
+            val cf = pf.getClassFile(nm)
+            cf match {
+              case classFile: ScalaClassFile =>
+                logger.debug("Found Scala class file: " + classFile.getElementName)
+                Some(classFile)
+              case _ => None
+            }
+          } headOption
         }
-      } headOption
+      }
     }
 
     def findPath(): Option[IPath] = {
@@ -80,7 +85,7 @@ trait LocateSymbol { self: ScalaPresentationCompiler =>
         findPath()
 
     findSourceFile.fold(findClassFile()){ f =>
-      SourceFileProviderRegistry.getProvider(f) flatMap (_.createFrom(f))
+      SourceFileProviderRegistry.getProvider(f).createFrom(f)
     }
   }
 

@@ -71,11 +71,11 @@ class ScalaCompletionProposal(proposal: CompletionProposal)
       case Trait         => traitImage
       case Package       => packageImage
       case PackageObject => packageObjectImage
-      case Object =>
+      case Object        =>
         if (isJava) javaClassImage
         else objectImage
-      case Type => typeImage
-      case _    => valImage
+      case Type          => typeImage
+      case _             => valImage
     }
   }
 
@@ -318,4 +318,5 @@ object ScalaCompletionProposal {
   def getForegroundColor(): Color = colorFor(PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND)
 
   def getBackgroundColor(): Color = colorFor(PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND)
+
 }
