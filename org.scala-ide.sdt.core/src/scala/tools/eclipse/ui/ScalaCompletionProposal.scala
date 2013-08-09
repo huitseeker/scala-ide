@@ -183,10 +183,10 @@ class ScalaCompletionProposal(proposal: CompletionProposal, selectionProvider: I
       EditorHelpers.doWithCurrentEditor(editor => editor.selectAndReveal(startPos + completionFullString.length(), 0))
    }
 
-  def getTriggerCharacters = null
-  def getContextInformationPosition = startOfArgumentList
+  override def getTriggerCharacters = null
+  override def getContextInformationPosition = startOfArgumentList
 
-  def isValidFor(d: IDocument, pos: Int) =
+  override def isValidFor(d: IDocument, pos: Int) =
     prefixMatches(completion.toArray, d.get.substring(startPos, pos).toArray)
 
   /** Insert a completion proposal, with placeholders for each explicit argument.
