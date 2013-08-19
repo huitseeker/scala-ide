@@ -16,7 +16,7 @@ import org.scalaide.util.internal.ScalaWordFinder
 import org.scalaide.util.internal.eclipse.EclipseUtils._
 import org.scalaide.core.compiler.InteractiveCompilationUnit
 
-class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with  ITextHoverExtension with ITextHoverExtension2 {
+class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with ITextHoverExtension with ITextHoverExtension2 {
 
   private val NoHoverInfo = "" // could return null, but prefer to return empty (see API of ITextHover).
 
@@ -45,7 +45,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with  I
             val pt = pre(t)
             val site = pt.typeSymbol
             val sym = if(tsym.isCaseApplyOrUnapply) site else tsym
-            val header = if (sym.isClass || sym.isModule) sym.fullName else {
+            val header = if (sym.isClass || sym.isModule) sym.nameString else {
               val tpe = sym.tpe.asSeenFrom(pt.widen, site)
               defString(sym, tpe)
             }
@@ -61,7 +61,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with  I
       }
 
       val wordPos = region.toRangePos(src)
-       val pos = unitOfFile(src.file).body find {
+      val pos = unitOfFile(src.file).body find {
          case Apply(fun, _) if fun.pos.isRange && fun.pos.end == wordPos.end => true
          case _ => false
        } map (_.pos) getOrElse wordPos
