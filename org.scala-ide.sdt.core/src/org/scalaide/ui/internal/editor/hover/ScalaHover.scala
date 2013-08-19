@@ -133,7 +133,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
             val pt = pre(t)
             val site = pt.typeSymbol
             val sym = if(tsym.isCaseApplyOrUnapply) site else tsym
-            val header = if (sym.isClass || sym.isModule) sym.fullName else {
+            val header = if (sym.isClass || sym.isModule) sym.nameString else {
               val tpe = sym.tpe.asSeenFrom(pt.widen, site)
               defString(sym, tpe)
             }

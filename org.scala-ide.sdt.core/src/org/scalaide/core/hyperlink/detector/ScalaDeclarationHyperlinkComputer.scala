@@ -59,11 +59,11 @@ class ScalaDeclarationHyperlinkComputer extends HasLogger {
             case ap @ Select(qual, nme.apply)                     => List(ap.symbol, qual.symbol)
             case st if st.symbol ne null                          => List(st.symbol)
             case _                                                => List()
-          }
+          } map (_.filterNot{ sym => sym == NoSymbol || sym.isPackage || sym.isJavaDefined })
         }.getOption().flatten
 
         symsOpt map { syms =>
-          syms filterNot { sym => sym == NoSymbol || sym.isPackage || sym.isJavaDefined } flatMap { sym =>
+          syms flatMap { sym =>
              DeclarationHyperlinkFactory.create(Hyperlink.withText("Open Declaration (%s)".format(sym.toString)), sym, wordRegion)
           }
         }

@@ -68,9 +68,13 @@ trait LocateSymbol { self: ScalaPresentationCompiler =>
       val javaProject = project.javaProject.asInstanceOf[JavaProject]
       val nameLookup = new SearchableEnvironment(javaProject, null: WorkingCopyOwner).nameLookup
 
-      val name = if (sym.owner.isPackageObject) sym.owner.owner.fullName + ".package" else sym.enclosingTopLevelClass.fullName
+      val name = asyncExec{
+        if ((sym != NoSymbol) && sym.owner.isPackageObject) sym.owner.owner.fullName + ".package" else sym.enclosingTopLevelClass.fullName
+      }.getOption()
       logger.debug("Looking for compilation unit " + name)
-      Option(nameLookup.findCompilationUnit(name)) map (_.getResource().getFullPath())
+      name.flatMap{ n =>
+        Option(nameLookup.findCompilationUnit(n)) map (_.getResource().getFullPath())
+      }
     }
 
     def findSourceFile(): Option[IPath] =

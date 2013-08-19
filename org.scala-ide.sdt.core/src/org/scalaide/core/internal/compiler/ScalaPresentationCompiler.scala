@@ -383,7 +383,7 @@ class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) 
       } else scalaParamNames
     }
 
-    val docFun = () => asyncExec{browserInput(sym, sym.enclClass)}.getOption().flatten // TODO: proper site. How?
+    def docFun = () => asyncExec{browserInput(sym, sym.enclClass)}.getOption().flatten // TODO: proper site. How?
 
     CompletionProposal(
       kind,
