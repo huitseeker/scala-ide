@@ -28,6 +28,7 @@ import org.scalaide.util.internal.eclipse.RegionUtils
 import org.scalaide.util.internal.ui.DisplayThread
 import org.scalaide.core.SdtConstants
 import org.eclipse.jface.internal.text.html.BrowserInput
+import scala.tools.nsc.interactive.CompilerControl
 
 object ScalaHover extends HasLogger {
   /** could return null, but prefer to return empty (see API of ITextHover). */
@@ -177,10 +178,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
 
       def typeMessage = {
         val wordPos = region.toRangePos(src)
-        val pos = unitOfFile(src.file).body find {
-          case Apply(fun, _) if fun.pos.isRange && fun.pos.end == wordPos.end => true
-          case _ => false
-        } map (_.pos) getOrElse wordPos
+        val pos = {val pTree = locateTree(wordPos); if (pTree.hasSymbolField) pTree.pos else wordPos}
         val tree = askTypeAt(pos).getOption()
 
         val content = tree.flatMap(typeInfo).map(_.toString).getOrElse("")
