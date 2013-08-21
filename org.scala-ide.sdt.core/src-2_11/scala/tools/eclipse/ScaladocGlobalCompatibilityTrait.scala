@@ -15,6 +15,8 @@ protected class ScaladocEnabledGlobal(settings:scala.tools.nsc.Settings, compile
 trait ScaladocGlobalCompatibilityTrait extends Global
    with scala.tools.nsc.doc.ScaladocGlobalTrait { outer =>
 
+
+    // @see analogous member in scala.tools.nsc.interactive.Global
     override lazy val loaders = new {
     val global: outer.type = outer
     val platform: outer.platform.type = outer.platform } with BrowsingLoaders {
