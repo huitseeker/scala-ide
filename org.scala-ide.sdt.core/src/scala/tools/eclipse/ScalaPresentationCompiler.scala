@@ -63,7 +63,6 @@ class ScalaPresentationCompiler(val project: ScalaProject, settings: Settings) e
 
   override def forScaladoc = true
 
-
   def presentationReporter = reporter.asInstanceOf[ScalaPresentationCompiler.PresentationReporter]
   presentationReporter.compiler = this
 
@@ -198,7 +197,7 @@ class ScalaPresentationCompiler(val project: ScalaProject, settings: Settings) e
    *        map is by a call to 'withSourceFile', which creates a default batch source file.
    *        Come back to this and make it more explicit.
    */
-  def askReload(scu: ScalaCompilationUnit, content: Array[Char]): Response[Unit] = {
+  def askReload(scu: InteractiveCompilationUnit, content: Array[Char]): Response[Unit] = {
     val res = new Response[Unit]
 
     sourceFiles.get(scu) match {
