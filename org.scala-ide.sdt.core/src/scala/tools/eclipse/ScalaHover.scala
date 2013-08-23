@@ -32,6 +32,8 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
     icu.withSourceFile({ (src, compiler) =>
       import compiler.{stringToTermName => _, stringToTypeName => _, _}
 
+      compiler.askReload(icu, icu.getContents()).get
+
       def hoverInfo(t: Tree): Option[Object] = {
         val askedOpt = askOption { () =>
           def compose(ss: List[String]): String = ss.filterNot(_.isEmpty).mkString(" ")
