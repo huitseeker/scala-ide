@@ -141,7 +141,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
         }.getOption().flatten
 
         for ((sym, site, header) <- askedOpt) yield
-          browserInput(sym, site, header) getOrElse {
+          asyncExec{browserInput(sym, site, header)}.getOrElse(None)().getOrElse {
             val html = "<html><body><b>" + header + "</b></body></html>"
             new scompiler.BrowserInput(html, sym)
           }

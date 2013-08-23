@@ -19,6 +19,14 @@ class PresentationCompilerDocTest {
   def tearDown(): Unit = project.presentationCompiler.shutdown()
 
   @Test
+  def basicComment() {
+    val expect: Comment => Boolean = { cmt =>
+      existsText(cmt.body, "This is a basic comment")
+    }
+    doTest(open("clasz.scala"), expect)
+  }
+
+  @Test
   def variableExpansion() {
     val expect: Comment => Boolean = { cmt =>
       existsText(cmt.body, "correctly got derived comment")

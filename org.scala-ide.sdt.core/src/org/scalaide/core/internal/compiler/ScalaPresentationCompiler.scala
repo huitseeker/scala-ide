@@ -49,6 +49,7 @@ import org.scalaide.core.compiler._
 import org.scalaide.core.compiler.IScalaPresentationCompiler._
 import org.scalaide.core.internal.compiler.Scaladoc
 import org.scalaide.core.internal.compiler.ScaladocGlobalCompatibilityTrait
+import org.scalaide.core.internal.compiler.ScaladocEnabledGlobal
 
 class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) extends {
   /*
@@ -60,7 +61,7 @@ class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) 
    */
   private val nameLock = new Object
 
-} with Global(settings, new ScalaPresentationCompiler.PresentationReporter, project.underlying.getName)
+} with ScaladocEnabledGlobal(settings, new ScalaPresentationCompiler.PresentationReporter, project.underlying.getName)
   with ScaladocGlobalCompatibilityTrait
   with ScalaStructureBuilder
   with ScalaIndexBuilder
@@ -382,7 +383,7 @@ class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) 
       } else scalaParamNames
     }
 
-    val docFun = () => browserInput(sym, sym.enclClass) // TODO: proper site. How?
+    val docFun = () => asyncExec{browserInput(sym, sym.enclClass)}.getOption().flatten // TODO: proper site. How?
 
     CompletionProposal(
       kind,

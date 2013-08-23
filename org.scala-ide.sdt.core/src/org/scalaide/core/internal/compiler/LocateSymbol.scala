@@ -30,7 +30,7 @@ import org.scalaide.core.compiler._
 
 trait LocateSymbol { self: ScalaPresentationCompiler =>
 
-  def findCompilationUnit(sym: Symbol) = {
+  def findCompilationUnit(sym: Symbol): Option[InteractiveCompilationUnit] = {
 
    def enclosingClassForScalaDoc(sym:Symbol): Symbol = {
       if ((sym.isClass || sym.isModule) && sym.isPackage) sym else sym.enclosingPackageClass
