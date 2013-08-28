@@ -326,7 +326,7 @@ class ScalaPresentationCompiler(val project: ScalaProject, settings: Settings) e
       } else scalaParamNames
     }
 
-    def docFun() = browserInput(sym, tpe.typeSymbol)
+    def docFun() = askOption{ () => browserInput(sym, tpe.typeSymbol) }.getOrElse(None)
 
     CompletionProposal(kind,
       start,
