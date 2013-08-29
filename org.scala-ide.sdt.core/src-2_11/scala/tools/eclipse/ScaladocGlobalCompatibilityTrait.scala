@@ -5,11 +5,24 @@ import scala.tools.nsc.doc.{ScaladocGlobalTrait => _, _}
 import scala.tools.nsc.symtab.BrowsingLoaders
 import scala.tools.nsc.interactive.InteractiveScaladocAnalyzer
 import scala.tools.nsc.interactive.InteractiveReporter
+import scala.tools.nsc.typechecker.Analyzer
+import scala.tools.nsc.typechecker.Typers
+import scala.collection.mutable
+
+trait CommentPreservingTypers extends Typers {
+  self: Analyzer =>
+
+  override def resetTyper() = {
+    resetContexts()
+    resetImplicits()
+    transformed.clear()
+  }
+}
 
 protected class ScaladocEnabledGlobal(settings:scala.tools.nsc.Settings, compilerReporter:InteractiveReporter, name:String) extends Global(settings, compilerReporter, name) {
   override lazy val analyzer = new {
     val global: ScaladocEnabledGlobal.this.type = ScaladocEnabledGlobal.this
-  } with InteractiveScaladocAnalyzer
+  } with InteractiveScaladocAnalyzer with CommentPreservingTypers
 }
 
 trait ScaladocGlobalCompatibilityTrait extends Global

@@ -198,6 +198,7 @@ class ScalaPresentationCompiler(val project: ScalaProject, settings: Settings) e
    *        Come back to this and make it more explicit.
    */
   def askReload(scu: InteractiveCompilationUnit, content: Array[Char]): Response[Unit] = {
+    global.clearDocComments()
     val res = new Response[Unit]
 
     sourceFiles.get(scu) match {
