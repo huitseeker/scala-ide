@@ -214,10 +214,7 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
   def filesDeleted(files: List[ScalaCompilationUnit]) {
     logger.info("files deleted:\n" + (files map (_.getPath) mkString "\n"))
     synchronized {
-      val srcs = files.map(sourceFiles remove _).foldLeft(List[SourceFile]()) {
-        case (acc, None)    => acc
-        case (acc, Some(f)) => f :: acc
-      }
+      val srcs: List[SourceFile] = files.map(sourceFiles remove _).flatten
       if (!srcs.isEmpty)
         askFilesDeleted(srcs, new Response[Unit])
     }
