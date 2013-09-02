@@ -179,7 +179,7 @@ class ScalaCompletionProposal(proposal: CompletionProposal, selectionProvider: I
        case viewer: ITextViewer if explicitParamNames.flatten.nonEmpty =>
         addArgumentTemplates(d, viewer, completionFullString)
        case _ => ()
-     }
+    }
     else
       EditorHelpers.doWithCurrentEditor(editor => editor.selectAndReveal(startPos + completionFullString.length(), 0))
    }
