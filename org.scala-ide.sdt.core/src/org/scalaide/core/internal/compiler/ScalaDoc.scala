@@ -13,6 +13,7 @@ import org.scalaide.core.internal.compiler.ScalaPresentationCompiler
 import scala.tools.nsc.interactive.Response
 import scala.reflect.api.Position
 import org.scalaide.core.compiler.IScalaPresentationCompiler.Implicits._
+import org.eclipse.jdt.core.IJavaElement
 
 trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPresentationCompiler =>
   val global: this.type = this
@@ -95,7 +96,7 @@ trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPre
            { htmlContents(header, comment) }
           </body>
         </html>
-      new BrowserInput(html.toString, sym)
+      new BrowserInput(html.toString, getJavaElement(sym, project.javaProject).orNull)
     }
 
     def bodiesToHtml(caption: String, bodies: List[Body]): NodeSeq =
@@ -174,10 +175,12 @@ trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPre
       headerHtml ++ mainHtml
     }
   }
+}
 
-  class BrowserInput(@BeanProperty val html: String,
-                     @BeanProperty val inputElement: Object,
-                     @BeanProperty val inputName: String) extends BrowserInformationControlInput(null) {
-    def this(html: String, sym: Symbol) = this(html, getJavaElement(sym, project.javaProject).orNull, sym.toString)
-  }
+class BrowserInput(@BeanProperty val html: String,
+                   @BeanProperty val inputElement: Object,
+                   @BeanProperty val inputName: String) extends BrowserInformationControlInput(null) {
+  @deprecated("use BrowserInput(html:String, sym:IJavaElement), see ScalaJavaMapper.getJavaElement")
+  def this(html: String, sym:Symbol) = this(html, sym, sym.toString)
+  def this(html: String, sym: IJavaElement) = this(html, sym, sym.toString)
 }

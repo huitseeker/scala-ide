@@ -27,8 +27,8 @@ import org.scalaide.util.internal.eclipse.OSGiUtils
 import org.scalaide.util.internal.eclipse.RegionUtils
 import org.scalaide.util.internal.ui.DisplayThread
 import org.scalaide.core.SdtConstants
-import org.eclipse.jface.internal.text.html.BrowserInput
 import scala.tools.nsc.interactive.CompilerControl
+import org.scalaide.core.internal.compiler.BrowserInput
 
 object ScalaHover extends HasLogger {
   /** could return null, but prefer to return empty (see API of ITextHover). */
@@ -145,7 +145,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
         for ((sym, site, header) <- askedOpt) yield
           asyncExec{browserInput(sym, site, header)}.getOrElse(None)().getOrElse {
             val html = "<html><body><b>" + header + "</b></body></html>"
-            new scompiler.BrowserInput(html, sym)
+            new BrowserInput(html, getJavaElement(sym, project.javaProject).orNull)
           }
       }
 
