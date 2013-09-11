@@ -10,12 +10,12 @@ import org.eclipse.swt.SWT
 import org.eclipse.swt.widgets.Shell
 import org.eclipse.jface.text.IInformationControlCreator
 import org.eclipse.jface.text.DefaultInformationControl
-
 import scala.tools.nsc.interactive.CompilerControl
 import scala.tools.nsc.symtab.Flags
 import org.scalaide.util.internal.ScalaWordFinder
 import org.scalaide.util.internal.eclipse.EclipseUtils._
 import org.scalaide.core.compiler.InteractiveCompilationUnit
+import org.scalaide.core.BrowserInput
 
 class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with ITextHoverExtension with ITextHoverExtension2 {
 
@@ -57,7 +57,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
         for ((sym, site, header) <- askedOpt) yield
           compiler.askOption{ () => browserInput(sym, site, header) }.getOrElse(None).getOrElse {
             val html = "<html><body><b>" + header + "</b></body></html>"
-            new BrowserInput(html, sym)
+            new BrowserInput(html, getJavaElement(sym, project.javaProject).orNull)
           }
       }
 
