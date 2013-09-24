@@ -109,7 +109,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
   override def getHoverInfo2(viewer: ITextViewer, region: IRegion): AnyRef =
     getHoverInfo(viewer, region)
 
-  override def getHoverInfo(viewer: ITextViewer, region: IRegion) = {
+  override def getHoverInfo(viewer: ITextViewer, region: IRegion): String = {
     icu.withSourceFile({ (src, compiler) =>
       // TODO : API compliance
       val scompiler = compiler.asInstanceOf[ScalaPresentationCompiler]
@@ -119,21 +119,23 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
 
       def typeInfo(t: Tree): Option[Object] = {
         val askedOpt = asyncExec {
-        def compose(ss: List[String]): String = ss.filterNot(_.isEmpty).mkString(" ")
-        def defString(sym: Symbol, tpe: Type): String = {
-          compose(List(sym.flagString(Flags.ExplicitFlags), sym.keyString, sym.varianceString + sym.nameString +
-            sym.infoString(tpe)))
-        }
-          for (tsym <- Option(t.symbol)) yield {
-            def pre(t: Tree): Type = t match {
-              case Apply(fun, _) => pre(fun)
-              case Select(qual, _) => qual.tpe
-              case _ if tsym.enclClass ne NoSymbol => ThisType(tsym.enclClass)
-              case _ => NoType
-            }
-            val pt = pre(t)
+          def compose(ss: List[String]): String = ss.filterNot(_.isEmpty).mkString(" ")
+          def defString(sym: Symbol, tpe: Type): String = {
+            compose(List(sym.flagString(Flags.ExplicitFlags), sym.keyString, sym.varianceString + sym.nameString +
+              sym.infoString(tpe)))
+          }
+          def pre(tsym: Symbol, t: Tree): Type = t match {
+            case Apply(fun, _) => pre(tsym, fun)
+            case Select(qual, _) => qual.tpe
+            case _ if tsym.enclClass ne NoSymbol => ThisType(tsym.enclClass)
+            case _ => NoType
+          }
+          for (
+            tsym <- Option(t.symbol);
+            pt <- Option(pre(tsym, t))
+          ) yield {
             val site = pt.typeSymbol
-            val sym = if(tsym.isCaseApplyOrUnapply) site else tsym
+            val sym = if (tsym.isCaseApplyOrUnapply) site else tsym
             val header = if (sym.isClass || sym.isModule) sym.nameString else {
               val tpe = sym.tpe.asSeenFrom(pt.widen, site)
               defString(sym, tpe)
@@ -142,11 +144,10 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
           }
         }.getOption().flatten
 
-        for ((sym, site, header) <- askedOpt) yield
-          asyncExec{browserInput(sym, site, header)}.getOrElse(None)().getOrElse {
-            val html = "<html><body><b>" + header + "</b></body></html>"
-            new BrowserInput(html, getJavaElement(sym, project.javaProject).orNull)
-          }
+        for ((sym, site, header) <- askedOpt) yield asyncExec { browserInput(sym, site, header) }.getOrElse(None)().getOrElse {
+          val html = "<html><body><b>" + header + "</b></body></html>"
+          new BrowserInput(html, getJavaElement(sym, project.javaProject).orNull)
+        }
       }
 
 
