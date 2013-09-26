@@ -26,7 +26,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
   private val NoHoverInfo = "" // could return null, but prefer to return empty (see API of ITextHover).
 
   @deprecated("Use getHoverInfo2","4.0.0")
-  override def getHoverInfo(viewer: ITextViewer, region: IRegion) : String = null
+  override def getHoverInfo(viewer: ITextViewer, region: IRegion): String = null
 
   override def getHoverInfo2(viewer: ITextViewer, region: IRegion): Object =
     icu.withSourceFile({ (src, compiler) =>
@@ -60,7 +60,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
         }.flatten
 
         for ((sym, site, header) <- askedOpt) yield
-          compiler.askOption{ () => browserInput(sym, site, header) }.getOrElse(None).getOrElse {
+          browserInput(sym, site, header).getOrElse {
             val html = "<html><body><b>" + header + "</b></body></html>"
             new BrowserInput(html, getJavaElement(sym, project.javaProject).orNull)
           }
