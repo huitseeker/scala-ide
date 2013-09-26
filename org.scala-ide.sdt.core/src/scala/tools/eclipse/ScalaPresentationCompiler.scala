@@ -387,5 +387,3 @@ object ScalaPresentationCompiler {
     }
   }
 }
-
-

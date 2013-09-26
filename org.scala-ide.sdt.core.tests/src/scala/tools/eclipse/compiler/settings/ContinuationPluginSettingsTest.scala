@@ -34,6 +34,12 @@ object ContinuationPluginSettingsTest {
     prefs.save()
   }
 
+  private def setPrefValue(key: String, value: Boolean) {
+    val prefs = project.projectSpecificStorage
+    prefs.setValue(key, value)
+    prefs.save()
+  }
+
   @AfterClass
   def deleteTestProject() {
     project.underlying.delete(true, null)
@@ -79,7 +85,7 @@ class ContinuationPluginSettingsTest {
     setPrefValue("Xpluginsdir", "/doesnotexist")
     setPrefValue("Xplugin", "/doesnotexits")
     forceEnableContinuationForNewerScalaVersion()
-    project.resetPresentationCompiler()
+
 
     project.underlying.build(IncrementalProjectBuilder.CLEAN_BUILD, new NullProgressMonitor)
     project.underlying.build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor)
@@ -95,6 +101,7 @@ class ContinuationPluginSettingsTest {
   private def forceEnableContinuationForNewerScalaVersion() {
     if (TestUtil.installedScalaVersionGreaterOrEqualsTo(new Version(2, 11, 0)))
       setPrefValue("P", "continuations:enable")
+    project.presentationCompiler.askRestart()
   }
 
 }
