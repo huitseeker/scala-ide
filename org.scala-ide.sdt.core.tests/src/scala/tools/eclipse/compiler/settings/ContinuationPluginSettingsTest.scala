@@ -94,7 +94,7 @@ class ContinuationPluginSettingsTest {
   }
 
   private def loadedPlugins(project: ScalaProject): List[String] = {
-    val plugins = project.withPresentationCompiler(comp => comp.plugins)(List[Plugin]())
+    val plugins = project.presentationCompiler(_.plugins) getOrElse Nil
     plugins.map(_.name)
   }
 
