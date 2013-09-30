@@ -42,7 +42,7 @@ class PresentationCompilerTest {
           overrideIndicatorBuilder.traverse(tree)
         }
       }
-    }()
+    }
 
     // verify
     verify(mockLogger, times(0)).error(any())
