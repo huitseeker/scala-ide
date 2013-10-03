@@ -89,7 +89,7 @@ class TestProjectSetup(projectName: String, srcRoot: String = "/%s/src/", val bu
       val dummy = new compiler.Response[compiler.Tree]
       compiler.askParsedEntered(src, false, dummy)
       dummy.get
-    }()
+    }
   }
 
   def findMarker(marker: String) = SDTTestUtils.findMarker(marker)
