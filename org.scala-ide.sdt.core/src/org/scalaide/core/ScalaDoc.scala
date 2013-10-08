@@ -1,5 +1,4 @@
 /*
- * @author Eugene Vigdorchik
  */
 package org.scalaide.core.internal.compiler
 
