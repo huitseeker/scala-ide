@@ -15,6 +15,9 @@ object PresentationCompilerDocTest extends TestProjectSetup("pc_doc")
 class PresentationCompilerDocTest {
   import PresentationCompilerDocTest._
 
+  @After
+  def tearDown(): Unit = project.presentationCompiler.shutdown()
+
   @Test
   def variableExpansion() {
     val expect: Comment => Boolean = { cmt =>
