@@ -57,6 +57,7 @@ class PresentationCompilerDocTest {
  * @parameter unit the compilation unit containing the position mark
  */
   private def doTest(unit: ScalaCompilationUnit, expectation: Comment => Boolean, preload: List[ScalaCompilationUnit] = Nil) {
+    project.presentationCompiler.askRestart()
     for (u <- preload) { reload(u) }
     unit.doWithSourceFile { (src, compiler) =>
       val pos = docPosition(src, compiler)
