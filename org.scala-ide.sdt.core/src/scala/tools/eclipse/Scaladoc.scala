@@ -51,6 +51,7 @@ trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPre
     val res =
 
       for (u <- findCompilationUnit(sym)) yield u.withSourceFile { (source, _) =>
+        logger.debug("Looking at sourcefile: " + source + " for unit " + u)
 
         def listFragments(syms:List[Symbol]): List[(Symbol, SourceFile)] = syms flatMap ((sym:Symbol) =>
           findCompilationUnit(sym) flatMap {(x) => u.withSourceFile {(source, _) => (sym,source)}}
@@ -58,8 +59,14 @@ trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPre
 
         def withFragments(fragments: List[(Symbol, SourceFile)]): Option[(String, String, Position)] = {
           val response = new Response[(String, String, Position)]
+          logger.debug("CALLING askdocComment with: " + sym + " on source: " + source + " fragments: " + fragments)
           askDocComment(sym, source, site, fragments, response)
-          response.get.left.toOption
+          val v = response.get.left.toOption
+          v match {
+            case Some(x) => {logger.debug("askDocComment call for " + sym + " SUCEEDED") ; logger.debug("RESULT:" + x)}
+            case _ => logger.debug("askDocComment call for " + sym + " FAILED")
+          }
+          v
         }
 
         askOption {
@@ -68,8 +75,9 @@ trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPre
           withFragments(listFragments(syms)) flatMap {
             case (expanded, raw, pos) if !expanded.isEmpty =>
               askOption { () => parseAtSymbol(expanded, raw, pos, site) }
-            case _ =>
+            case _ =>{
               None
+            }
           }
         }
       } getOrElse (None)
@@ -79,7 +87,7 @@ trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPre
   def browserInput(sym: Symbol, site: Symbol, header: String = ""): Option[BrowserInput] = {
     logger.info("Computing documentation for: " + sym)
     val comment = parsedDocComment(sym, site)
-    logger.info("retrieve documentation result: " + comment)
+    logger.info("retrieve documentation for " + sym + " gives result " + comment)
 
     askOption { () =>
       comment map (HtmlProducer(_, sym, header))
