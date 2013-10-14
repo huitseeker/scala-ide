@@ -37,23 +37,25 @@ trait LocateSymbol { self : ScalaPresentationCompiler =>
       if ((sym.isClass || sym.isModule) && sym.isPackage) sym else sym.enclosingPackageClass
     }
 
+    def symClassName(sym: Symbol): Option[String] = askOption { () =>
+      val top = sym.enclosingTopLevelClass
+      if ((sym != NoSymbol) && sym.owner.isPackageObjectClass) "package$.class" else top.name + (if (top.isModuleClass) "$" else "") + ".class"
+      }
+
     def findClassFile: Option[InteractiveCompilationUnit] = {
       logger.debug("Looking for a classfile for " + sym.fullName)
+
+      val name = symClassName(sym)
+
       val javaProject = project.javaProject.asInstanceOf[JavaProject]
       val packName = askOption { () => enclosingClassForScalaDoc(sym).fullName }
       packName.flatMap{ pn =>
-        val name = askOption { () =>
-          val top = sym.enclosingTopLevelClass
-          if ((sym != NoSymbol) && sym.owner.isPackageObjectClass) "package$.class" else top.name + (if (top.isModuleClass) "$" else "") + ".class"
-        }
-
         name.flatMap { nm =>
           val pfs = new SearchableEnvironment(javaProject, null: WorkingCopyOwner).nameLookup.findPackageFragments(pn, false)
 
           if (pfs eq null) None else pfs.toStream flatMap { pf =>
             logger.debug("Trying out to get " + nm)
-            val cf = pf.getClassFile(nm)
-            cf match {
+            pf.getClassFile(nm) match {
               case classFile : ScalaClassFile =>
                 logger.debug("Found Scala class file: " + classFile.getElementName)
                 Some(classFile)
