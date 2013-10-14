@@ -36,29 +36,27 @@ trait LocateSymbol { self: ScalaPresentationCompiler =>
       if ((sym.isClass || sym.isModule) && sym.hasPackageFlag) sym else sym.enclosingPackageClass
     }
 
+    def symClassName(sym: Symbol): Option[String] = askOption { () =>
+      val top = sym.enclosingTopLevelClass
+      if ((sym != NoSymbol) && sym.owner.isPackageObjectClass) "package$.class" else top.name + (if (top.isModuleClass) "$" else "") + ".class"
+      }
+
     def findClassFile(): Option[InteractiveCompilationUnit] = {
       logger.debug("Looking for a classfile for " + sym.fullName)
       val javaProject = project.javaProject.asInstanceOf[JavaProject]
       val packName = asyncExec { enclosingClassForScalaDoc(sym).fullName }.getOption()
 
+      val name = symClassName(sym)
       packName.flatMap { pn =>
-        val name = asyncExec {
-          val top = sym.enclosingTopLevelClass
-          if (sym.owner.isPackageObjectClass) "package$.class" else top.name + (if (top.isModuleClass) "$" else "") + ".class"
-        }.getOption()
-
-        name flatMap { nm =>
-          val pfs = new SearchableEnvironment(javaProject, null: WorkingCopyOwner).nameLookup.findPackageFragments(pn, false)
-          if (pfs eq null) None else pfs.toStream flatMap { pf =>
-            logger.debug("Trying out to get " + name)
-            val cf = pf.getClassFile(nm)
-            cf match {
+        val pfs = new SearchableEnvironment(javaProject, null: WorkingCopyOwner).nameLookup.findPackageFragments(pn, false)
+        name.flatMap { nm =>
+          if (pfs eq null) None else pfs.toStream map
+            { pf => logger.debug("Trying out to get " + nm); pf.getClassFile(nm) } collectFirst
+            {
               case classFile: ScalaClassFile =>
                 logger.debug("Found Scala class file: " + classFile.getElementName)
-                Some(classFile)
-              case _ => None
+                classFile
             }
-          } headOption
         }
       }
     }

@@ -207,7 +207,8 @@ class FreshFile {
           }
         }
       }
-
+    } getOrElse {
+      Assert.fail("shouldn't happen")
     }
 
 }
