@@ -28,6 +28,7 @@ class PerspectiveFactory extends IPerspectiveFactory {
     layout.addNewWizardShortcut(ScalaPlugin.plugin.objectWizId)
     layout.addNewWizardShortcut(ScalaPlugin.plugin.packageObjectWizId)
     layout.addNewWizardShortcut(ScalaPlugin.plugin.applicationWizId)
+    layout.addNewWizardShortcut(ScalaPlugin.plugin.sourceFolderWizId)
     layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.folder")
     layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.file")
 
@@ -46,9 +47,9 @@ class PerspectiveFactory extends IPerspectiveFactory {
     problemsFolder.addView(IPageLayout.ID_PROBLEM_VIEW)
     problemsFolder.addView(IPageLayout.ID_TASK_LIST)
     problemsFolder.addView(IConsoleConstants.ID_CONSOLE_VIEW)
-//    problemsFolder.addView("org.eclipse.pde.runtime.LogView")
+    //    problemsFolder.addView("org.eclipse.pde.runtime.LogView")
 
-    val outlineFolder = layout.createFolder("right", IPageLayout.RIGHT,0.75f,editorArea)
+    val outlineFolder = layout.createFolder("right", IPageLayout.RIGHT, 0.75f, editorArea)
     outlineFolder.addView(IPageLayout.ID_OUTLINE)
   }
 }

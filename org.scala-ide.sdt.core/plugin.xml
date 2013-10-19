@@ -358,6 +358,17 @@
             <description>Create a Scala application</description>
             <selection class="java.lang.Object"/>
       </wizard>
+      <wizard
+            class="org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard"
+            icon="icons/full/etool16/newpackfolder_wiz.png"
+            finalPerspective="org.scala-ide.sdt.core.perspective"
+            category="org.scala-ide.sdt.core.wizards"
+            project="false"
+            name="Source Folder"
+            id="org.scala-ide.sdt.core.wizards.newSourceFolder">
+            <description>Create a source folder</description>
+            <selection class="java.lang.Object"/>
+      </wizard>
    </extension>
    <extension
          point="org.eclipse.ui.ide.projectNatureImages">
