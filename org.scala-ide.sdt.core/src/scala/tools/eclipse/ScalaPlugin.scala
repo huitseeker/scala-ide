@@ -117,7 +117,6 @@ class ScalaPlugin extends AbstractUIPlugin with PluginLogConfigurator with IReso
   def objectWizId = wizardId("Object")
   def packageObjectWizId = wizardId("PackageObject")
   def applicationWizId = wizardId("Application")
-  def sourceFolderWizId = wizardId("SourceFolder")
   def projectWizId = wizardId("Project")
   def netProjectWizId = wizardId("NetProject")
 
