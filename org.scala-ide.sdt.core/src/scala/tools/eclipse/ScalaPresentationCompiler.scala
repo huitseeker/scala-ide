@@ -44,6 +44,41 @@ import org.eclipse.core.runtime.Path
 import org.eclipse.core.resources.IFile
 import org.eclipse.jdt.internal.core.util.Util
 
+trait OptionAsking{ self: Global =>
+  def askOption[A](op: () => A): Option[A]
+}
+
+trait LoadedTypeAdapter extends scala.tools.nsc.interactive.CompilerControl with OptionAsking { self:Global =>
+
+  /*
+   * TODO : this askLoadedTyped semantics should be pushed in the PC
+   */
+
+  @deprecated("This method is about to be removed", "4.0.0")
+  def body(sourceFile: SourceFile, keepLoaded: Boolean = false): Either[Tree, Throwable] = loadedType(sourceFile, keepLoaded)
+
+  override def askLoadedTyped(sourceFile: SourceFile, response: Response[Tree]):Unit =
+    askLoadedTyped(sourceFile, false, response)
+
+  def askLoadedTyped(sourceFile: SourceFile, keepLoaded: Boolean, response: Response[Tree]):Unit = {
+    // iff the unit was already loaded (e.g. open buffer) we don't force a final reset controlled by keepLoaded
+    val wasLoaded = askOption{() => getUnit(sourceFile).isDefined}.getOrElse(false)
+    try super.askLoadedTyped(sourceFile, response)
+    finally { if (!wasLoaded && !keepLoaded) askOption{() => removeUnitOf(sourceFile)} }
+  }
+
+  def loadedType(sourceFile: SourceFile, keepLoaded:Boolean = false): Either[Tree, Throwable] = {
+    val response = new Response[Tree]
+    if (self.onCompilerThread)
+      throw ScalaPresentationCompiler.InvalidThread("Tried to execute `askLoadedType` while inside `ask`")
+    askLoadedTyped(sourceFile, keepLoaded, response)
+    response.get
+  }
+
+  /*
+   * END askLoadedTyped semantics
+   */
+}
 
 class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) extends {
   /*
@@ -64,7 +99,8 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
   with JavaSig
   with JVMUtils
   with LocateSymbol
-  with HasLogger { self =>
+  with HasLogger
+  with OptionAsking with LoadedTypeAdapter { self =>
 
   def presentationReporter = reporter.asInstanceOf[ScalaPresentationCompiler.PresentationReporter]
   presentationReporter.compiler = this
@@ -135,22 +171,6 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
   @deprecated("Use `InteractiveCompilationUnit.withSourceFile` instead", since = "4.0.0")
   def withSourceFile[T](icu: InteractiveCompilationUnit)(op: (SourceFile, ScalaPresentationCompiler) => T): T =
     icu.withSourceFile(op) getOrElse (throw new UnsupportedOperationException("Use `InteractiveCompilationUnit.withSourceFile`"))
-
-  def body(sourceFile: SourceFile): Either[Tree, Throwable] = {
-    val response = new Response[Tree]
-    if (self.onCompilerThread)
-      throw ScalaPresentationCompiler.InvalidThread("Tried to execute `askType` while inside `ask`")
-    askLoadedTyped(sourceFile, response)
-    response.get
-  }
-
-  def loadedType(sourceFile: SourceFile): Either[Tree, Throwable] = {
-    val response = new Response[Tree]
-    if (self.onCompilerThread)
-      throw ScalaPresentationCompiler.InvalidThread("Tried to execute `askLoadedType` while inside `ask`")
-    askLoadedTyped(sourceFile, response)
-    response.get
-  }
 
   def withParseTree[T](sourceFile: SourceFile)(op: Tree => T): T = {
     op(parseTree(sourceFile))
