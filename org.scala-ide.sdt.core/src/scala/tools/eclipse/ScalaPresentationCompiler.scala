@@ -48,7 +48,11 @@ trait OptionAsking{ self: Global =>
   def askOption[A](op: () => A): Option[A]
 }
 
-trait LoadedTypeAdapter extends scala.tools.nsc.interactive.CompilerControl with OptionAsking { self:Global =>
+trait CompilationUnitBearing { self: Global =>
+  def compilationUnits: List[InteractiveCompilationUnit]
+}
+
+trait LoadedTypeAdapter extends OptionAsking with scala.tools.nsc.interactive.CompilerControl { self:Global =>
 
   /*
    * TODO : this askLoadedTyped semantics should be pushed in the PC
@@ -80,6 +84,82 @@ trait LoadedTypeAdapter extends scala.tools.nsc.interactive.CompilerControl with
    */
 }
 
+trait AskMethodsAdapter extends CompilationUnitBearing with scala.tools.nsc.interactive.CompilerControl { self: Global =>
+
+  /**
+   * The set of compilation units to be reloaded at the next refresh round.
+   * Refresh rounds can be triggered by the reconciler, but also interactive requests
+   * (e.g. completion)
+   */
+  private val scheduledUnits = new scala.collection.concurrent.TrieMap[InteractiveCompilationUnit,Array[Char]]
+
+  /**
+   * Add a compilation unit (CU) to the set of CUs to be Reloaded at the next refresh round.
+   * If the CU is unknown by the compiler at scheduling, this is a no-op.
+   */
+  def scheduleReload(icu : InteractiveCompilationUnit, contents:Array[Char]) : Unit = {
+    if (compilationUnits.contains(icu))
+        scheduledUnits.synchronized { scheduledUnits += ((icu, contents)) }
+  }
+
+  /**
+   * Reload the scheduled compilation units and reset the set of scheduled reloads.
+   *  For any CU not tracked by the presentation compiler at schedule time, it's a no-op.
+   */
+  def flushScheduledReloads(): Response[Unit] = {
+    val res = new Response[Unit]
+    scheduledUnits.synchronized {
+      val reloadees = scheduledUnits.toList
+
+      if (reloadees.isEmpty) res.set(())
+      else {
+        val reloadFiles = reloadees map { case (s, c) => s.sourceFile(c) }
+        askReload(reloadFiles, res)
+        res.get
+      }
+      scheduledUnits.clear()
+    }
+    res
+  }
+
+  private def postWorkItem(item: WorkItem) = if (item.onCompilerThread) item() else scheduler.postWorkItem(item)
+
+  override def askFilesDeleted(sources: List[SourceFile], response: Response[Unit]) = {
+    flushScheduledReloads()
+    super.askFilesDeleted(sources, response)
+  }
+
+  override def askLinkPos(sym: Symbol, source: SourceFile, response: Response[Position]) = {
+    flushScheduledReloads()
+    super.askLinkPos(sym, source, response)
+  }
+
+  override def askParsedEntered(source: SourceFile, keepLoaded: Boolean, response: Response[Tree]) = {
+    flushScheduledReloads()
+    super.askParsedEntered(source, keepLoaded, response)
+  }
+
+  override def askScopeCompletion(pos: Position, response: Response[List[Member]]) = {
+    flushScheduledReloads()
+    super.askScopeCompletion(pos, response)
+  }
+
+  override def askToDoFirst(source: SourceFile) = {
+    flushScheduledReloads()
+    super.askToDoFirst(source)
+  }
+
+  override def askTypeAt(pos: Position, response: Response[Tree]) = {
+    flushScheduledReloads()
+    super.askTypeAt(pos, response)
+  }
+
+  override def askTypeCompletion(pos: Position, response: Response[List[Member]]) = {
+    flushScheduledReloads()
+    super.askTypeCompletion(pos, response)
+  }
+}
+
 class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) extends {
   /*
    * Lock object for protecting compiler names. Names are cached in a global `Array[Char]`
@@ -100,7 +180,8 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
   with JVMUtils
   with LocateSymbol
   with HasLogger
-  with OptionAsking with LoadedTypeAdapter { self =>
+  with OptionAsking with LoadedTypeAdapter
+  with AskMethodsAdapter { self =>
 
   def presentationReporter = reporter.asInstanceOf[ScalaPresentationCompiler.PresentationReporter]
   presentationReporter.compiler = this
@@ -114,42 +195,9 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
     } yield icu
   }
 
-  /** Schedule all units open handled by this presentation compiler for reconciliation.  */
+  /** Reconcile all units open handled by this presentation compiler. */
   def reconcileOpenUnits() {
     askReload(compilationUnits)
-  }
-
-  /**
-   * The set of compilation units to be reloaded at the next refresh round.
-   * Refresh rounds can be triggered by the reconciler, but also interactive requests
-   * (e.g. completion)
-   */
-  private val scheduledUnits = new mutable.HashMap[InteractiveCompilationUnit,Array[Char]]
-
-  /**
-   * Add a compilation unit (CU) to the set of CUs to be Reloaded at the next refresh round.
-   * If the CU is unknown by the compiler at scheduling, this is a no-op.
-   */
-  def scheduleReload(icu : InteractiveCompilationUnit, contents:Array[Char]) : Unit = {
-    if (compilationUnits.contains(icu))
-        synchronized { scheduledUnits += ((icu, contents)) }
-  }
-
-  /** Reload the scheduled compilation units and reset the set of scheduled reloads.
-   *  For any CU not tracked by the presentation compiler at schedule time, it's a no-op.
-   */
-  def flushScheduledReloads() : Response[Unit]= {
-    val reloadees = scheduledUnits.toList
-    scheduledUnits.clear()
-
-    val res = new Response[Unit]
-    if (reloadees.isEmpty) res.set(())
-    else {
-      val reloadFiles = reloadees map { case (s,c) => s.sourceFile(c) }
-      askReload(reloadFiles, res)
-      res.get
-    }
-    res
   }
 
   def problemsOf(file: AbstractFile): List[IProblem] = {

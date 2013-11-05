@@ -156,7 +156,7 @@ class SemanticHighlightingPositionsTest {
       document.replace(offset, length, edit.newText) // triggers the IUpdatePosition listener
       unit.getBuffer().replace(offset, length, edit.newText) // needed by the semantic highlighting reconciler
       // compiler needs to reload the content of the unit (this is usually done by the reconciler, but the test does not rely on it)
-      project.doWithPresentationCompiler { _.askReload(unit, unit.getContents) }
+      project.doWithPresentationCompiler { (pc) => pc.scheduleReload(unit, unit.getContents); pc.flushScheduledReloads() }
     }
 
     // perform edit
@@ -168,6 +168,7 @@ class SemanticHighlightingPositionsTest {
       throw new AssertionError("After edition, no marker `%s` should be present in test code:\n%s".format(Marker, currentTestCode))
 
     // This will trigger semantic highlighting computation, which in turn will update the document's positions (sequential execution!)
+
     editor.reconcileNow()
 
     val newPositions = positionsInRegion(new Region(start, edit.newText.length()))
