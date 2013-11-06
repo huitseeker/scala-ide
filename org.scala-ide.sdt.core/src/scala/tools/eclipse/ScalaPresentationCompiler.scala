@@ -48,11 +48,7 @@ trait OptionAsking{ self: Global =>
   def askOption[A](op: () => A): Option[A]
 }
 
-trait CompilationUnitBearing { self: Global =>
-  def compilationUnits: List[InteractiveCompilationUnit]
-}
-
-trait LoadedTypeAdapter extends OptionAsking with scala.tools.nsc.interactive.CompilerControl { self:Global =>
+trait LoadedTypeAdapter extends scala.tools.nsc.interactive.CompilerControl with OptionAsking { self:Global =>
 
   /*
    * TODO : this askLoadedTyped semantics should be pushed in the PC
@@ -84,7 +80,44 @@ trait LoadedTypeAdapter extends OptionAsking with scala.tools.nsc.interactive.Co
    */
 }
 
-trait AskMethodsAdapter extends CompilationUnitBearing with scala.tools.nsc.interactive.CompilerControl { self: Global =>
+class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) extends {
+  /*
+   * Lock object for protecting compiler names. Names are cached in a global `Array[Char]`
+   * and concurrent access may lead to overwritten names.
+   *
+   * @note This field is EARLY because `newTermName` is hit during construction of the superclass `Global`,
+   *       and the lock object has to be constructed already.
+   */
+  private val nameLock = new Object
+
+} with Global(settings, new ScalaPresentationCompiler.PresentationReporter, project.underlying.getName)
+  with ScalaStructureBuilder
+  with ScalaIndexBuilder
+  with ScalaMatchLocator
+  with ScalaOverrideIndicatorBuilder
+  with ScalaJavaMapper
+  with JavaSig
+  with JVMUtils
+  with LocateSymbol
+  with HasLogger
+  with OptionAsking with LoadedTypeAdapter { self =>
+
+  def presentationReporter = reporter.asInstanceOf[ScalaPresentationCompiler.PresentationReporter]
+  presentationReporter.compiler = this
+
+  def compilationUnits: List[InteractiveCompilationUnit] = {
+    val managedFiles = unitOfFile.keySet.toList
+    for {
+      f <- managedFiles.collect { case ef: EclipseFile => ef }
+      icu <- SourceFileProviderRegistry.getProvider(f.workspacePath).createFrom(f.workspacePath)
+        if icu.exists
+    } yield icu
+  }
+
+  /** Reconcile all units open handled by this presentation compiler. */
+  def reconcileOpenUnits() {
+    askReload(compilationUnits)
+  }
 
   /**
    * The set of compilation units to be reloaded at the next refresh round.
@@ -122,83 +155,40 @@ trait AskMethodsAdapter extends CompilationUnitBearing with scala.tools.nsc.inte
     res
   }
 
-  private def postWorkItem(item: WorkItem) = if (item.onCompilerThread) item() else scheduler.postWorkItem(item)
-
-  override def askFilesDeleted(sources: List[SourceFile], response: Response[Unit]) = {
-    flushScheduledReloads()
-    super.askFilesDeleted(sources, response)
-  }
-
-  override def askLinkPos(sym: Symbol, source: SourceFile, response: Response[Position]) = {
-    flushScheduledReloads()
-    super.askLinkPos(sym, source, response)
-  }
-
-  override def askParsedEntered(source: SourceFile, keepLoaded: Boolean, response: Response[Tree]) = {
-    flushScheduledReloads()
-    super.askParsedEntered(source, keepLoaded, response)
-  }
-
-  override def askScopeCompletion(pos: Position, response: Response[List[Member]]) = {
-    flushScheduledReloads()
-    super.askScopeCompletion(pos, response)
-  }
-
-  override def askToDoFirst(source: SourceFile) = {
-    flushScheduledReloads()
-    super.askToDoFirst(source)
-  }
-
-  override def askTypeAt(pos: Position, response: Response[Tree]) = {
-    flushScheduledReloads()
-    super.askTypeAt(pos, response)
-  }
-
-  override def askTypeCompletion(pos: Position, response: Response[List[Member]]) = {
-    flushScheduledReloads()
-    super.askTypeCompletion(pos, response)
-  }
-}
-
-class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) extends {
-  /*
-   * Lock object for protecting compiler names. Names are cached in a global `Array[Char]`
-   * and concurrent access may lead to overwritten names.
-   *
-   * @note This field is EARLY because `newTermName` is hit during construction of the superclass `Global`,
-   *       and the lock object has to be constructed already.
-   */
-  private val nameLock = new Object
-
-} with Global(settings, new ScalaPresentationCompiler.PresentationReporter, project.underlying.getName)
-  with ScalaStructureBuilder
-  with ScalaIndexBuilder
-  with ScalaMatchLocator
-  with ScalaOverrideIndicatorBuilder
-  with ScalaJavaMapper
-  with JavaSig
-  with JVMUtils
-  with LocateSymbol
-  with HasLogger
-  with OptionAsking with LoadedTypeAdapter
-  with AskMethodsAdapter { self =>
-
-  def presentationReporter = reporter.asInstanceOf[ScalaPresentationCompiler.PresentationReporter]
-  presentationReporter.compiler = this
-
-  def compilationUnits: List[InteractiveCompilationUnit] = {
-    val managedFiles = unitOfFile.keySet.toList
-    for {
-      f <- managedFiles.collect { case ef: EclipseFile => ef }
-      icu <- SourceFileProviderRegistry.getProvider(f.workspacePath).createFrom(f.workspacePath)
-        if icu.exists
-    } yield icu
-  }
-
-  /** Reconcile all units open handled by this presentation compiler. */
-  def reconcileOpenUnits() {
-    askReload(compilationUnits)
-  }
+//  override def askFilesDeleted(sources: List[SourceFile], response: Response[Unit]) = {
+//    flushScheduledReloads()
+//    super.askFilesDeleted(sources, response)
+//  }
+//
+//  override def askLinkPos(sym: Symbol, source: SourceFile, response: Response[Position]) = {
+//    flushScheduledReloads()
+//    super.askLinkPos(sym, source, response)
+//  }
+//
+//  override def askParsedEntered(source: SourceFile, keepLoaded: Boolean, response: Response[Tree]) = {
+//    flushScheduledReloads()
+//    super.askParsedEntered(source, keepLoaded, response)
+//  }
+//
+//  override def askScopeCompletion(pos: Position, response: Response[List[Member]]) = {
+//    flushScheduledReloads()
+//    super.askScopeCompletion(pos, response)
+//  }
+//
+//  override def askToDoFirst(source: SourceFile) = {
+//    flushScheduledReloads()
+//    super.askToDoFirst(source)
+//  }
+//
+//  override def askTypeAt(pos: Position, response: Response[Tree]) = {
+//    flushScheduledReloads()
+//    super.askTypeAt(pos, response)
+//  }
+//
+//  override def askTypeCompletion(pos: Position, response: Response[List[Member]]) = {
+//    flushScheduledReloads()
+//    super.askTypeCompletion(pos, response)
+//  }
 
   def problemsOf(file: AbstractFile): List[IProblem] = {
     unitOfFile get file match {
