@@ -162,21 +162,19 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
 
   /**
    * Add a compilation unit (CU) to the set of CUs to be Reloaded at the next refresh round.
-   * If the CU is unknown by the compiler at scheduling, this is a no-op.
    */
   def scheduleReload(icu : InteractiveCompilationUnit, contents:Array[Char]) : Unit = {
-    if (compilationUnits.contains(icu))
-        scheduledUnits.synchronized { scheduledUnits += ((icu, contents)) }
+    scheduledUnits.synchronized { scheduledUnits += ((icu, contents)) }
   }
 
   /**
    * Reload the scheduled compilation units and reset the set of scheduled reloads.
-   *  For any CU not tracked by the presentation compiler at schedule time, it's a no-op.
+   *  For any CU unknown by the compiler at reload, this is a no-op.
    */
   def flushScheduledReloads(): Response[Unit] = {
     val res = new Response[Unit]
     scheduledUnits.synchronized {
-      val reloadees = scheduledUnits.toList
+      val reloadees = scheduledUnits filter {(scu) => compilationUnits.contains(scu._1)} toList
 
       if (reloadees.isEmpty) res.set(())
       else {
@@ -187,6 +185,22 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
       scheduledUnits.clear()
     }
     res
+  }
+
+  /**
+   * Return the compilation units in the scheduled Reloads table,
+   * removes them from scheduled reloads doing so
+   */
+  def cleanScheduledReloads(): List[SourceFile] = {
+    var reloadees= List[(InteractiveCompilationUnit, Array[Char])]()
+
+    scheduledUnits.synchronized {
+      reloadees = scheduledUnits filter {(scu) => compilationUnits.contains(scu._1)} toList
+      val _ = scheduledUnits.clear()
+    }
+
+    if (reloadees.isEmpty) Nil
+    else reloadees map { case (s, c) => s.sourceFile(c) }
   }
 
   override def askFilesDeleted(sources: List[SourceFile], response: Response[Unit]) = {
@@ -302,6 +316,17 @@ class ScalaPresentationCompiler(project: ScalaProject, settings: Settings) exten
           case Left(v) => Some(v)
         }
     }
+  }
+
+  def askOptionWithReload[A](op: () => A): Option[A] = askOptionWithReload(op, 10000)
+
+  def askOptionWithReload[A](op: () => A, timeout: Int): Option[A] = {
+    val reloadResponse = new Response[Unit]
+    /*
+     *  The ReloadItem is here to bypass the visibility of compiler.reload() methods.
+     */
+    def nuOp = {ReloadItem(cleanScheduledReloads(), reloadResponse); op}
+    askOption(nuOp, timeout)
   }
 
   /** Ask to put scu in the beginning of the list of files to be typechecked.
