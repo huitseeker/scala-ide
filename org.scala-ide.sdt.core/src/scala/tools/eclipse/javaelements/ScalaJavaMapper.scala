@@ -28,6 +28,7 @@ trait ScalaJavaMapper extends ScalaAnnotationHelper with HasLogger { self : Scal
       DoubleClass,
       NilModule,
       ListClass).foreach(_.initialize)
+      TupleClass.seq.foreach(fullyInitializeSymbol)
   }
 
   /** Return the Java Element corresponding to the given Scala Symbol, looking in the
