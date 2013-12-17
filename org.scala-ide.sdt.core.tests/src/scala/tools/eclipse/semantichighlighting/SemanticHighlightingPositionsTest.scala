@@ -155,8 +155,6 @@ class SemanticHighlightingPositionsTest {
     def editTestCode(offset: Int, length: Int, newText: String): Unit = {
       document.replace(offset, length, edit.newText) // triggers the IUpdatePosition listener
       unit.getBuffer().replace(offset, length, edit.newText) // needed by the semantic highlighting reconciler
-      // compiler needs to reload the content of the unit (this is usually done by the reconciler, but the test does not rely on it)
-      project.presentationCompiler { _.askReload(unit, unit.getContents) }
     }
 
     // perform edit
@@ -259,6 +257,9 @@ class SemanticHighlightingPositionsTest {
 object SemanticHighlightingPositionsTest {
 
   class TextPresentationStub(override val sourceViewer: ISourceViewer) extends TextPresentationHighlighter {
+
+    import scala.language.reflectiveCalls
+
     @volatile private var reconciler: Job = _
     @volatile var positionsTracker: PositionsTracker = _
     @volatile var damagedRegion: IRegion = _

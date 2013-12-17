@@ -118,7 +118,7 @@ class TestProjectSetup(projectName: String, srcRoot: String = "/%s/src/", val bu
     unit.withSourceFile { (source, compiler) =>
       import scala.tools.nsc.interactive.Response
       val res = new Response[compiler.Tree]
-      compiler.askLoadedTyped(source, true, res)
+      compiler.askLoadedTyped(source, res)
       res.get // wait until unit is typechecked
     }
   }
