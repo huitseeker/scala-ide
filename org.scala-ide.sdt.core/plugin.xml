@@ -1060,12 +1060,12 @@
          name="Move Class/Object/Trait"/>
       <command
          categoryId="org.scalaide.ui.menu.refactoring"
-         id="org.scalaide.refactoring.ExtractLocal"
-         name="Extract Local"/>
-      <command
-         categoryId="org.scalaide.ui.menu.refactoring"
          id="org.scalaide.refactoring.InlineLocal"
          name="Inline Local"/>
+      <command
+         categoryId="org.scalaide.ui.menu.refactoring"
+         id="org.scalaide.refactoring.ExtractValue"
+         name="Extract Value"/>
       <command
          categoryId="org.scalaide.ui.menu.refactoring"
          id="org.scalaide.refactoring.OrganizeImports"
@@ -1134,16 +1134,6 @@
          schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
          contextId="scala.tools.eclipse.scalaEditorScope"
          sequence="M2+M3+T"/>
-   <key
-   		 commandId="org.scalaide.refactoring.ExtractMethod"
-   		 schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-   		 contextId="scala.tools.eclipse.scalaEditorScope"
-   		 sequence="M2+M3+M"/>
-   <key
-   		 commandId="org.scalaide.refactoring.ExtractLocal"
-   		 schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
-   		 contextId="scala.tools.eclipse.scalaEditorScope"
-   		 sequence="M2+M3+L"/>
    <key
    		 commandId="org.scalaide.refactoring.InlineLocal"
    		 schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
@@ -1251,30 +1241,8 @@
           commandId="org.scalaide.refactoring.InlineLocal">
     </handler>
     <handler
-          class="org.scalaide.refactoring.internal.ExtractLocal"
-          commandId="org.scalaide.refactoring.ExtractLocal">
-       <enabledWhen>
-          <with
-                variable="selection">
-             <test
-                   property="org.scalaide.ui.internal.editor.nonEmpty"
-                   value="true">
-             </test>
-          </with>
-       </enabledWhen>
-    </handler>
-    <handler
-          class="org.scalaide.refactoring.internal.ExtractMethod"
-          commandId="org.scalaide.refactoring.ExtractMethod">
-       <enabledWhen>
-          <with
-                variable="selection">
-             <test
-                   property="org.scalaide.ui.internal.editor.nonEmpty"
-                   value="true">
-             </test>
-          </with>
-       </enabledWhen>
+          class="org.scalaide.refactoring.internal.extract.ExtractValue"
+          commandId="org.scalaide.refactoring.ExtractValue">
     </handler>
     <handler
           class="org.scalaide.refactoring.internal.move.MoveClass"
@@ -1422,6 +1390,12 @@
                 name="org.scalaide.refactoring.separator.codeExtractionGroup"
                 visible="true">
           </separator>
+          <command
+                commandId="org.scalaide.refactoring.ExtractValue"
+                label="Extract Value"
+                style="push"
+                tooltip="Extract Value">
+          </command>
           <separator
                 name="org.scalaide.refactoring.separator.sourceGeneratorGroup"
                 visible="true">
@@ -1443,18 +1417,6 @@
                 label="Inline Local"
                 style="push"
                 tooltip="Inline Local">
-          </command>
-          <command
-                commandId="org.scalaide.refactoring.ExtractLocal"
-                label="Extract Local"
-                style="push"
-                tooltip="Extract Local">
-          </command>
-          <command
-                commandId="org.scalaide.refactoring.ExtractMethod"
-                label="Extract Method"
-                style="push"
-                tooltip="Extract Method">
           </command>
           <command
                 commandId="org.scalaide.refactoring.MoveClass"
