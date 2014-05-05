@@ -1072,6 +1072,10 @@
          name="Extract Method"/>
       <command
          categoryId="org.scalaide.ui.menu.refactoring"
+         id="org.scalaide.refactoring.ExtractParameter"
+         name="Extract Parameter"/>
+      <command
+         categoryId="org.scalaide.ui.menu.refactoring"
          id="org.scalaide.refactoring.OrganizeImports"
          name="Organize Imports"/>
       <command
@@ -1253,6 +1257,10 @@
           commandId="org.scalaide.refactoring.ExtractMethod">
     </handler>
     <handler
+          class="org.scalaide.refactoring.internal.extract.ExtractParameter"
+          commandId="org.scalaide.refactoring.ExtractParameter">
+    </handler>
+    <handler
           class="org.scalaide.refactoring.internal.move.MoveClass"
           commandId="org.scalaide.refactoring.MoveClass">
     </handler>
@@ -1409,6 +1417,12 @@
                 label="Extract Method"
                 style="push"
                 tooltip="Extract Method">
+          </command>
+          <command
+                commandId="org.scalaide.refactoring.ExtractParameter"
+                label="Extract Parameter"
+                style="push"
+                tooltip="Extract Parameter">
           </command>
           <separator
                 name="org.scalaide.refactoring.separator.sourceGeneratorGroup"
