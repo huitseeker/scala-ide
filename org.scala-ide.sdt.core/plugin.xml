@@ -1080,6 +1080,10 @@
          name="Extract Extractor"/>
       <command
          categoryId="org.scalaide.ui.menu.refactoring"
+         id="org.scalaide.refactoring.Extract"
+         name="Extract..."/>
+      <command
+         categoryId="org.scalaide.ui.menu.refactoring"
          id="org.scalaide.refactoring.OrganizeImports"
          name="Organize Imports"/>
       <command
@@ -1151,6 +1155,11 @@
    		 schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
    		 contextId="scala.tools.eclipse.scalaEditorScope"
    		 sequence="M2+M3+I"/>
+   <key
+   		 commandId="org.scalaide.refactoring.Extract"
+   		 schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+   		 contextId="scala.tools.eclipse.scalaEditorScope"
+   		 sequence="M2+M3+E"/>
    <key
    		 commandId="org.scalaide.refactoring.Rename"
    		 schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
@@ -1267,6 +1276,10 @@
     <handler
           class="org.scalaide.refactoring.internal.extract.ExtractExtractor"
           commandId="org.scalaide.refactoring.ExtractExtractor">
+    </handler>
+    <handler
+          class="org.scalaide.refactoring.internal.extract.Extract"
+          commandId="org.scalaide.refactoring.Extract">
     </handler>
     <handler
           class="org.scalaide.refactoring.internal.move.MoveClass"
@@ -1437,6 +1450,12 @@
                 label="Extract Extractor"
                 style="push"
                 tooltip="Extract Extractor">
+          </command>
+          <command
+                commandId="org.scalaide.refactoring.Extract"
+                label="Extract..."
+                style="push"
+                tooltip="Extract...">
           </command>
           <separator
                 name="org.scalaide.refactoring.separator.sourceGeneratorGroup"
