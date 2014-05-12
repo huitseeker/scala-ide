@@ -10,6 +10,7 @@ import org.scalaide.core.ScalaPlugin
 import scala.reflect.internal.MissingRequirementError
 import org.scalaide.core.internal.project.Nature
 import org.eclipse.core.runtime.IStatus
+import org.eclipse.core.runtime.MultiStatus
 import org.eclipse.debug.core.DebugPlugin
 import org.eclipse.core.runtime.Status
 
@@ -136,6 +137,16 @@ final class ScalaPresentationCompilerProxy(val project: ScalaProject) extends Ha
     * @note Should not throw.
     */
   private def create(): ScalaPresentationCompiler = pcLock.synchronized {
+    @volatile var pcScalaMissingStatus: Option[MultiStatus] = None
+
+    def updatePcStatus(msg: String, ex: Throwable) = {
+      if (!pcScalaMissingStatus.isDefined) {
+        pcScalaMissingStatus = Some(new MultiStatus(ScalaPlugin.plugin.pluginId, org.scalaide.ui.internal.handlers.MissingScalaRequirementHandler.STATUS_CODE_SCALA_MISSING, msg, ex))
+      } else {
+        pcScalaMissingStatus.get.add(new Status(IStatus.ERROR, ScalaPlugin.plugin.pluginId, org.scalaide.ui.internal.handlers.MissingScalaRequirementHandler.STATUS_CODE_SCALA_MISSING, msg, ex))
+      }
+    }
+
     try {
       val settings = ScalaPlugin.defaultScalaSettings()
       project.initializeCompilerSettings(settings, isPCSetting(settings))
@@ -145,22 +156,24 @@ final class ScalaPresentationCompilerProxy(val project: ScalaProject) extends Ha
       pc
     } catch {
       case ex @ MissingRequirementError(required) =>
-        val status = new Status(IStatus.ERROR, ScalaPlugin.plugin.pluginId, org.scalaide.ui.internal.handlers.MissingScalaRequirementHandler.STATUS_CODE_SCALA_MISSING, "could not find a required class: " + required, ex)
-        val handler = DebugPlugin.getDefault().getStatusHandler(status)
-        handler.handleStatus(status, this)
+        updatePcStatus("could not find a required class: " + required, ex)
         eclipseLog.error(ex)
         null
       case ex: Throwable =>
         logger.info("Throwable when intializing presentation compiler!!! " + ex.getMessage)
         ex.printStackTrace()
         if (project.underlying.isOpen) {
-          val status = new Status(IStatus.ERROR, ScalaPlugin.plugin.pluginId, org.scalaide.ui.internal.handlers.MissingScalaRequirementHandler.STATUS_CODE_SCALA_MISSING, "error initializing the presentation compiler: " + ex.getMessage(), ex)
-          val handler = DebugPlugin.getDefault().getStatusHandler(status)
-          handler.handleStatus(status, this)
+          updatePcStatus("error initializing the presentation compiler: " + ex.getMessage(), ex)
         }
         shutdown()
         eclipseLog.error(ex)
         null
+    } finally {
+      if (pcScalaMissingStatus.isDefined){
+        val status = pcScalaMissingStatus.get
+        val handler = DebugPlugin.getDefault().getStatusHandler(status)
+        handler.handleStatus(status, this)
+      }
     }
   }
 
