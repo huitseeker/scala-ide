@@ -22,9 +22,9 @@ object ClasspathErrorPromptStatusHandler {
 
 }
 
-class ClasspathErrorPromptStatusHandler extends IStatusHandler {
+class ClasspathErrorPromptStatusHandler extends RichStatusHandler {
 
-  def handleStatus(status: IStatus, source: Object): Object = {
+  def doHandleStatus(status: IStatus, source: Object) = {
     val scalaProject = source.asInstanceOfOpt[ScalaProject]
     val shell = ScalaPlugin.getShell
 
@@ -65,8 +65,6 @@ class ClasspathErrorPromptStatusHandler extends IStatusHandler {
       val buttonId = dialog.getReturnCode()
       if (buttonId == IDialogConstants.OK_ID) Utils.tryExecute(toggleProjectSpecificSettingsAndSetXsource())
     }
-
-    null
   }
 
 }
