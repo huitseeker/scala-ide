@@ -5,7 +5,7 @@ import scala.tools.nsc.settings.ScalaVersion
 import org.eclipse.core.runtime.IProgressMonitor
 import org.scalaide.core.internal.project.ScalaInstallation
 import sbt.compiler.IC
-import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.internal.ScalaPlugin
 import org.eclipse.core.runtime.Platform
 import org.scalaide.util.internal.eclipse.OSGiUtils
 import java.io.File
