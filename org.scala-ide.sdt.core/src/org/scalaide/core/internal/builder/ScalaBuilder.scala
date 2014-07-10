@@ -23,8 +23,12 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule
 import org.scalaide.core.internal.jdt.util.JDTUtils
 import org.scalaide.util.internal.SettingConverterUtil
 import org.scalaide.ui.internal.preferences
+import org.scalaide.core.ScalaConstants
+import org.scalaide.core.FromScalaPlugin
 
 class ScalaBuilder extends IncrementalProjectBuilder with JDTBuilderFacade with HasLogger {
+  
+  import org.scalaide.core.ScalaPlugin.plugin
 
   override def project = getProject()
 
@@ -73,7 +77,7 @@ class ScalaBuilder extends IncrementalProjectBuilder with JDTBuilderFacade with 
           getDelta(project.underlying).accept(new IResourceDeltaVisitor {
             def visit(delta : IResourceDelta) = {
               delta.getResource match {
-                case file : IFile if plugin.isBuildable(file) && project.sourceFolders.exists(_.isPrefixOf(file.getLocation)) =>
+                case file : IFile if FromScalaPlugin.isBuildable(file) && project.sourceFolders.exists(_.isPrefixOf(file.getLocation)) =>
                   delta.getKind match {
                     case IResourceDelta.ADDED | IResourceDelta.CHANGED =>
                       addedOrUpdated0 += file
@@ -133,7 +137,7 @@ class ScalaBuilder extends IncrementalProjectBuilder with JDTBuilderFacade with 
      *  (since the SBT builder automatically calls the JDT builder internally if there are modified Java sources).
      */
     def shouldRunJavaBuilder: Boolean = {
-      (needToCopyResources && !addedOrUpdated.exists(_.getName().endsWith(plugin.javaFileExtn)))
+      (needToCopyResources && !addedOrUpdated.exists(_.getName().endsWith(ScalaConstants.JavaFileExtn)))
     }
 
     // SBT build manager already calls java builder internally

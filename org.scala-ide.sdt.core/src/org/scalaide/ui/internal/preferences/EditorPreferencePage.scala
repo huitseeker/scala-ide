@@ -20,7 +20,7 @@ import EditorPreferencePage._
 
 class EditorPreferencePage extends PreferencePage with IWorkbenchPreferencePage {
 
-  private val store = ScalaPlugin.prefStore
+  private val store = ScalaPlugin.plugin.getPreferenceStore()
 
   private val preferencesToSave = ListBuffer[() => Unit]()
 

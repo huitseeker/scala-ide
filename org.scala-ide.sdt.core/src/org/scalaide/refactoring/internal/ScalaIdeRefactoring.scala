@@ -6,7 +6,6 @@ import scala.tools.refactoring.ParameterlessRefactoring
 import scala.tools.refactoring.common.Change
 import scala.tools.refactoring.common.InteractiveScalaCompiler
 import scala.tools.refactoring.common.TextChange
-
 import org.eclipse.core.runtime.CoreException
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.IStatus
@@ -20,6 +19,7 @@ import org.scalaide.core.compiler.ScalaPresentationCompiler
 import org.scalaide.core.internal.jdt.model.ScalaSourceFile
 import org.scalaide.util.internal.eclipse.EditorUtils
 import org.scalaide.util.internal.eclipse.FileUtils
+import org.scalaide.core.ScalaConstants
 
 /**
  * This is the abstract base class for all the concrete refactoring instances.
@@ -134,7 +134,7 @@ abstract class ScalaIdeRefactoring(val getName: String, val file: ScalaSourceFil
           EditorUtils.createTextFileChange(file, fileChanges)
         } getOrElse {
           val msg = "Could not find the corresponding IFile for "+ file.path
-          throw new CoreException(new Status(IStatus.ERROR, ScalaPlugin.plugin.pluginId, 0, msg, null))
+          throw new CoreException(new Status(IStatus.ERROR, ScalaConstants.PluginId, 0, msg, null))
         }
     }
   }
@@ -179,7 +179,7 @@ abstract class ScalaIdeRefactoring(val getName: String, val file: ScalaSourceFil
   }
 
   def fail(msg: String = "Could not get the source file."): Nothing = {
-    throw new CoreException(new Status(IStatus.ERROR, ScalaPlugin.plugin.pluginId, msg))
+    throw new CoreException(new Status(IStatus.ERROR, ScalaConstants.PluginId, msg))
   }
 }
 

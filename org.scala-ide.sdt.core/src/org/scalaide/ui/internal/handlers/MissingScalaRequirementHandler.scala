@@ -10,6 +10,7 @@ import org.scalaide.ui.internal.preferences.CompilerSettings
 import org.scalaide.util.internal.SettingConverterUtil
 import org.scalaide.util.internal.Utils.WithAsInstanceOfOpt
 import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.FromScalaPlugin
 import org.scalaide.core.compiler.ScalaPresentationCompilerProxy
 import org.scalaide.core.internal.project.Nature
 import org.scalaide.core.internal.project.ScalaProject
@@ -30,7 +31,7 @@ class MissingScalaRequirementHandler extends RichStatusHandler {
 
   def doHandleStatus(status: IStatus, source: Object) = {
     val scalaPc = source.asInstanceOfOpt[ScalaPresentationCompilerProxy]
-    val shell = ScalaPlugin.getShell
+    val shell = FromScalaPlugin.getShell
     val title = "Add Scala library to project classpath?"
 
     val msg = status.getMessage()

@@ -28,6 +28,7 @@ import org.scalaide.ui.syntax.ScalaSyntaxClass
 import org.scalaide.ui.syntax.ScalaSyntaxClasses
 import org.scalaide.ui.syntax.SyntaxColouringPreviewText
 import org.scalaide.ui.syntax.SyntaxColouringTreeContentAndLabelProvider
+import org.scalaide.core.ScalaConstants
 
 /**
  * @see org.eclipse.jdt.internal.ui.preferences.JavaEditorColoringConfigurationBlock
@@ -36,7 +37,7 @@ class SyntaxColoringPreferencePage extends PreferencePage with IWorkbenchPrefere
 
   import GridDataHelper._
 
-  setPreferenceStore(ScalaPlugin.prefStore)
+  setPreferenceStore(ScalaPlugin.plugin.getPreferenceStore())
   private val overlayStore = makeOverlayPreferenceStore
 
   private var enableSemanticHighlightingCheckBox: Button = _
@@ -98,7 +99,7 @@ class SyntaxColoringPreferencePage extends PreferencePage with IWorkbenchPrefere
   override def performOk() = {
     super.performOk()
     overlayStore.propagate()
-    InstanceScope.INSTANCE.getNode(ScalaPlugin.plugin.pluginId).flush()
+    InstanceScope.INSTANCE.getNode(ScalaConstants.PluginId).flush()
     true
   }
 

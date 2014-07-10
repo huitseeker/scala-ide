@@ -13,8 +13,8 @@ trait JDTBuilderFacade {
 
   protected val scalaJavaBuilder = new GeneralScalaJavaBuilder
 
-  protected def plugin = ScalaPlugin.plugin
-
+//  protected def plugin = ScalaPlugin.plugin
+//
   /** The underlying project. */
   protected def project: IProject
 

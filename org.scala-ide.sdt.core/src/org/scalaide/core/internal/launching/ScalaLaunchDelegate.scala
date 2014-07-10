@@ -36,6 +36,7 @@ import org.eclipse.debug.internal.core.IInternalDebugCoreConstants
 import org.eclipse.jface.dialogs.MessageDialogWithToggle
 import org.eclipse.jface.dialogs.IDialogConstants
 import java.util.concurrent.atomic.AtomicBoolean
+import org.scalaide.core.ScalaConstants
 
 class ScalaLaunchDelegate extends AbstractJavaLaunchConfigurationDelegate {
   /** This code is very heavily inspired from `JavaLaunchDelegate`. */
@@ -125,7 +126,7 @@ class ScalaLaunchDelegate extends AbstractJavaLaunchConfigurationDelegate {
   override protected def isLaunchProblem(problemMarker: IMarker): Boolean =
     super.isLaunchProblem(problemMarker) || {
       val isError = Option(problemMarker.getAttribute(IMarker.SEVERITY)).map(_.asInstanceOf[Integer].intValue >= IMarker.SEVERITY_ERROR).getOrElse(false)
-      isError && ScalaPlugin.plugin.scalaErrorMarkers.contains(problemMarker.getType())
+      isError && ScalaConstants.ScalaErrorMarkerIds.contains(problemMarker.getType())
     }
 
   /** Stop a launch if the main class does not exist. */
@@ -152,7 +153,7 @@ class ScalaLaunchDelegate extends AbstractJavaLaunchConfigurationDelegate {
 
   private def missingScalaLibraries(included: List[String], configuration: ILaunchConfiguration): List[String] = {
     val entries = JavaRuntime.computeUnresolvedRuntimeClasspath(configuration).toList
-    val libid = Path.fromPortableString(ScalaPlugin.plugin.scalaLibId)
+    val libid = Path.fromPortableString(ScalaConstants.ScalaLibContId)
     val found = entries.find(e => e.getClasspathEntry != null && e.getClasspathEntry.getPath == libid)
     found match {
       case Some(e) =>

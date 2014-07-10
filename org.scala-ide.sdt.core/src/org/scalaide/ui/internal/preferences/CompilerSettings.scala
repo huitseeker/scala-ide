@@ -51,6 +51,8 @@ import scala.tools.nsc.settings.ScalaVersion
 import scala.tools.nsc.settings.SpecificScalaVersion
 import scala.tools.nsc.settings.Final
 import org.eclipse.jface.preference.StringFieldEditor
+import org.scalaide.core.ScalaConstants
+import org.scalaide.core.FromScalaPlugin
 
 trait ScalaPluginPreferencePage extends HasLogger {
   self: PreferencePage with EclipseSettings =>
@@ -130,16 +132,16 @@ class CompilerSettings extends PropertyPage with IWorkbenchPreferencePage with E
   }
 
   /** Returns the id of what preference page we use */
-  def getPageId = ScalaPlugin.plugin.pluginId
+  def getPageId = ScalaConstants.PluginId
 
   import EclipseSetting.toEclipseBox
   /** The settings we can change */
-  lazy val userBoxes = IDESettings.shownSettings(ScalaPlugin.defaultScalaSettings()) ++ IDESettings.buildManagerSettings
+  lazy val userBoxes = IDESettings.shownSettings(FromScalaPlugin.defaultScalaSettings()) ++ IDESettings.buildManagerSettings
   lazy val eclipseBoxes = userBoxes.map { s => toEclipseBox(s, preferenceStore0) }
 
   /** Pulls the preference store associated with this plugin */
   override def doGetPreferenceStore(): IPreferenceStore = {
-    ScalaPlugin.prefStore
+    ScalaPlugin.plugin.getPreferenceStore()
   }
 
   var useProjectSettingsWidget: Option[UseProjectSettingsWidget] = None
@@ -163,7 +165,7 @@ class CompilerSettings extends PropertyPage with IWorkbenchPreferencePage with E
     }
     preferenceStore0.addPropertyChangeListener(countingListener)
 
-    val additionalSourceLevelParameter = ScalaPlugin.defaultScalaSettings().splitParams(additionalParamsWidget.additionalParametersControl.getText()) filter {s => s.startsWith("-Xsource")} headOption
+    val additionalSourceLevelParameter = FromScalaPlugin.defaultScalaSettings().splitParams(additionalParamsWidget.additionalParametersControl.getText()) filter {s => s.startsWith("-Xsource")} headOption
     val sourceLevelString = additionalSourceLevelParameter flatMap ("""-Xsource:(\d\.\d+(?:\.\d)*)""".r unapplySeq(_)) flatMap (_.headOption)
 
     useProjectSettingsWidget.foreach(_.store())
@@ -225,7 +227,7 @@ class CompilerSettings extends PropertyPage with IWorkbenchPreferencePage with E
         useProjectSettingsWidget = Some(new UseProjectSettingsWidget(outer))
         val other = new Composite(outer, SWT.SHADOW_ETCHED_IN)
         other.setLayout(new GridLayout(1, false))
-        if (ScalaPlugin.plugin.scalaVer >= SpecificScalaVersion(2, 11, 0, Final)) {
+        if (ScalaPlugin.plugin.scalaVersion >= SpecificScalaVersion(2, 11, 0, Final)) {
           dslWidget = Some(new DesiredSourceLevelWidget(other))
         }
         val tmp = new Group(outer, SWT.SHADOW_ETCHED_IN)
@@ -292,7 +294,7 @@ class CompilerSettings extends PropertyPage with IWorkbenchPreferencePage with E
         val plugin = ScalaPlugin.plugin
 
         for {
-          p <- (plugin.workspaceRoot.getProjects())
+          p <- (FromScalaPlugin.workspaceRoot.getProjects())
           scalaProject <- plugin.asScalaProject(p)
           if !scalaProject.usesProjectSettings
         } yield scalaProject.underlying
@@ -400,7 +402,7 @@ class CompilerSettings extends PropertyPage with IWorkbenchPreferencePage with E
 
       additionalParametersControl.addModifyListener { (event: ModifyEvent) =>
         val errors = new StringBuffer
-        val settings = ScalaPlugin.defaultScalaSettings(e => errors append ("\n" + e))
+        val settings = FromScalaPlugin.defaultScalaSettings(e => errors append ("\n" + e))
         val result = settings.processArgumentString(additionalParametersControl.getText())
         if (result._2.nonEmpty || errors.length() > 0) {
           errorDecoration.setDescriptionText(errors.toString)
@@ -415,7 +417,7 @@ class CompilerSettings extends PropertyPage with IWorkbenchPreferencePage with E
         updateApplyButton()
       }
 
-      val settings = ScalaPlugin.defaultScalaSettings()
+      val settings = FromScalaPlugin.defaultScalaSettings()
       val proposals = settings.visibleSettings.map(_.name)
 
       val provider = new IContentProposalProvider {

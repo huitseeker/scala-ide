@@ -174,6 +174,9 @@ class ScalaSourceViewerConfiguration(
   override def getAutoEditStrategies(sourceViewer: ISourceViewer, contentType: String): Array[IAutoEditStrategy] = {
     def prefProvider = new JdtPreferenceProvider(getProject)
     val partitioning = getConfiguredDocumentPartitioning(sourceViewer)
+    
+    // TODO: why not using the defined scalaPrefStore, javaPrefStore or combinedPrefStore?
+    val prefStore = ScalaPlugin.plugin.getPreferenceStore()
 
     contentType match {
       case IJavaPartitions.JAVA_DOC | IJavaPartitions.JAVA_MULTI_LINE_COMMENT | ScalaPartitions.SCALADOC_CODE_BLOCK =>
@@ -182,26 +185,26 @@ class ScalaSourceViewerConfiguration(
       case ScalaPartitions.SCALA_MULTI_LINE_STRING =>
         Array(
           new SmartSemicolonAutoEditStrategy(partitioning),
-          new MultiLineStringAutoIndentStrategy(partitioning, ScalaPlugin.prefStore),
-          new MultiLineStringAutoEditStrategy(partitioning, ScalaPlugin.prefStore))
+          new MultiLineStringAutoIndentStrategy(partitioning, prefStore),
+          new MultiLineStringAutoEditStrategy(partitioning, prefStore))
 
       case IJavaPartitions.JAVA_STRING =>
         Array(
           new SmartSemicolonAutoEditStrategy(partitioning),
-          new StringAutoEditStrategy(partitioning, ScalaPlugin.prefStore))
+          new StringAutoEditStrategy(partitioning, prefStore))
 
       case IJavaPartitions.JAVA_CHARACTER | IDocument.DEFAULT_CONTENT_TYPE =>
         Array(
           new SmartSemicolonAutoEditStrategy(partitioning),
           new ScalaAutoIndentStrategy(partitioning, getProject, sourceViewer, prefProvider),
-          new AutoIndentStrategy(ScalaPlugin.prefStore),
-          new BracketAutoEditStrategy(ScalaPlugin.prefStore),
-          new LiteralAutoEditStrategy(ScalaPlugin.prefStore))
+          new AutoIndentStrategy(prefStore),
+          new BracketAutoEditStrategy(prefStore),
+          new LiteralAutoEditStrategy(prefStore))
 
       case _ =>
         Array(
             new ScalaAutoIndentStrategy(partitioning, getProject, sourceViewer, prefProvider),
-            new AutoIndentStrategy(ScalaPlugin.prefStore))
+            new AutoIndentStrategy(prefStore))
     }
   }
 

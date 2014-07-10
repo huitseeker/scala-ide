@@ -16,6 +16,7 @@ import org.scalaide.util.internal.CompilerUtils
 import scala.concurrent.Promise
 import scala.tools.nsc.settings.ScalaVersion
 import org.scalaide.ui.internal.preferences.CompilerSettings
+import org.scalaide.core.FromScalaPlugin
 
 object ClasspathErrorPromptStatusHandler {
 
@@ -35,14 +36,14 @@ class ClasspathErrorPromptStatusHandler extends RichStatusHandler {
       case (_, c: Promise[()=> Unit]) => (None, Some(c))
       case _ => (None, None)
     }
-    val shell = ScalaPlugin.getShell
+    val shell = FromScalaPlugin.getShell
 
     val title = "Prior Scala library version detected in this project"
-    val expectedVer = ScalaPlugin.plugin.scalaVer.unparse
+    val expectedVer = ScalaPlugin.plugin.scalaVersion.unparse
     val projectName = scalaProject map ( _.underlying.getName()) getOrElse("")
     val message = s"The version of scala library found in the build path of $projectName is prior to the one provided by scala IDE. We rather expected: $expectedVer Turn on the source level flags for this specific project ?"
 
-    val previousScalaVer = ScalaPlugin.plugin.scalaVer match {
+    val previousScalaVer = ScalaPlugin.plugin.scalaVersion match {
       case CompilerUtils.ShortScalaVersion(major, minor) => {
         // This is technically incorrect for an epoch change, but the Xsource flag won't be enough to cover for that anyway
         val lesserMinor = minor - 1

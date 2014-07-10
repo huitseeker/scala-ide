@@ -15,6 +15,7 @@ import org.scalaide.core.internal.lexical.ScalaDocumentPartitioner
 import org.scalaide.core.internal.project.ScalaProject
 import org.scalaide.core.testsetup.SDTTestUtils
 import org.scalaide.util.internal.eclipse.EclipseUtils
+import org.scalaide.core.FromScalaPlugin
 import org.junit.AfterClass
 
 /**
@@ -165,7 +166,7 @@ trait CompilerSupport extends EclipseDocumentSupport {
 
   @AfterClass
   final def deleteProject(): Unit = {
-    EclipseUtils.workspaceRunnableIn(ScalaPlugin.plugin.workspaceRoot.getWorkspace()) { _ =>
+    EclipseUtils.workspaceRunnableIn(FromScalaPlugin.workspaceRoot.getWorkspace()) { _ =>
       project.underlying.delete(/* force */ true, new NullProgressMonitor)
     }
   }

@@ -11,7 +11,7 @@ class ScalaFormatterPreferenceInitializer extends AbstractPreferenceInitializer 
   import FormatterPreferences._
 
   def initializeDefaultPreferences() {
-    val preferenceStore = ScalaPlugin.prefStore
+    val preferenceStore = ScalaPlugin.plugin.getPreferenceStore
     for (preference <- AllPreferences.preferences) {
       preference match {
         case pd: BooleanPreferenceDescriptor =>

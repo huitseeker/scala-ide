@@ -29,7 +29,7 @@ class EclipseUserSimulator {
     project.open(null)
 
     val description = project.getDescription()
-    description.setNatureIds(Array(ScalaPlugin.plugin.natureId, JavaCore.NATURE_ID))
+    description.setNatureIds(Array(ScalaConstants.NatureId, JavaCore.NATURE_ID))
     project.setDescription(description, null)
 
     val javaProject = JavaCore.create(project)
@@ -45,7 +45,7 @@ class EclipseUserSimulator {
       entries += JavaCore.newSourceEntry(root.getPath())
     }
 
-    entries += JavaCore.newContainerEntry(Path.fromPortableString(ScalaPlugin.plugin.scalaLibId))
+    entries += JavaCore.newContainerEntry(Path.fromPortableString(ScalaConstants.ScalaLibContId))
     javaProject.setRawClasspath(entries.toArray[IClasspathEntry], null)
 
     ScalaPlugin.plugin.getScalaProject(project)

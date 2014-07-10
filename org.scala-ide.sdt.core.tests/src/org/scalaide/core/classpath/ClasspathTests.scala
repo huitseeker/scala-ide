@@ -26,6 +26,7 @@ import org.scalaide.util.internal.SettingConverterUtil
 import org.scalaide.ui.internal.preferences.ScalaPluginSettings
 import scala.tools.nsc.Settings
 import org.scalaide.util.internal.SettingConverterUtil
+import org.scalaide.core.ScalaConstants
 
 object ClasspathTests extends TestProjectSetup("classpath")
 
@@ -43,7 +44,7 @@ object ClasspathTests extends TestProjectSetup("classpath")
 class ClasspathTests {
 
   import ClasspathTests._
-  val classpathMarkerId = ScalaPlugin.plugin.classpathProblemMarkerId
+  val classpathMarkerId = ScalaConstants.ClasspathProblemMarkerId
 
   // 60s should be enough even for Jenkins builds running under high-load
   // (increased from 10s)
@@ -69,6 +70,8 @@ class ClasspathTests {
     projectStore.setValue(SettingConverterUtil.USE_PROJECT_SETTINGS_PREFERENCE, true)
     projectStore.save()
   }
+  
+  private def prefStore = ScalaPlugin.plugin.getPreferenceStore()
 
   @After
   def resetProjectSpecificSettings() = {
@@ -85,7 +88,7 @@ class ClasspathTests {
   def resetPreferences() {
     projectStore.setToDefault(CompilerSettings.ADDITIONAL_PARAMS)
     projectStore.save()
-    ScalaPlugin.prefStore.setToDefault(SettingConverterUtil.convertNameToProperty(ScalaPluginSettings.withVersionClasspathValidator.name))
+    prefStore.setToDefault(SettingConverterUtil.convertNameToProperty(ScalaPluginSettings.withVersionClasspathValidator.name))
   }
 
   /**
@@ -108,7 +111,7 @@ class ClasspathTests {
    */
   @Test
   def binaryIncompatibleLibraryWithPreferenceFalse() {
-    ScalaPlugin.prefStore.setValue(SettingConverterUtil.convertNameToProperty(ScalaPluginSettings.withVersionClasspathValidator.name), false)
+    prefStore.setValue(SettingConverterUtil.convertNameToProperty(ScalaPluginSettings.withVersionClasspathValidator.name), false)
     val majorMinor = getIncompatibleScalaVersion
     setRawClasspathAndCheckMarkers(baseRawClasspath :+ newLibraryEntry("specs2_%s.2-0.12.3.jar".format(majorMinor)), expectedWarnings = 0, expectedErrors = 0)
   }
@@ -118,7 +121,7 @@ class ClasspathTests {
    */
   @Test
   def previousBinaryWithPreferenceFalse() {
-    ScalaPlugin.prefStore.setValue(SettingConverterUtil.convertNameToProperty(ScalaPluginSettings.withVersionClasspathValidator.name), false)
+    prefStore.setValue(SettingConverterUtil.convertNameToProperty(ScalaPluginSettings.withVersionClasspathValidator.name), false)
     val newRawClasspath= cleanRawClasspath :+ createPreviousScalaLibraryEntry()
     val majorMinor = getPreviousScalaVersion
     setRawClasspathAndCheckMarkers(newRawClasspath :+ newLibraryEntry("specs2_%s.2-0.12.3.jar".format(majorMinor)), expectedWarnings = 0, expectedErrors = 1)
@@ -186,7 +189,7 @@ class ClasspathTests {
    */
   @Test
   def lowVersionLibrary() {
-    ScalaPlugin.prefStore.setValue(SettingConverterUtil.convertNameToProperty(ScalaPluginSettings.withVersionClasspathValidator.name), false)
+    prefStore.setValue(SettingConverterUtil.convertNameToProperty(ScalaPluginSettings.withVersionClasspathValidator.name), false)
     setRawClasspathAndCheckMarkers(baseRawClasspath :+ newLibraryEntry("specs2_2.7.8-0.12.3.jar"), expectedWarnings = 0, expectedErrors = 0)
   }
 
@@ -466,7 +469,7 @@ class ClasspathTests {
 
     project.classpathHasChanged() // trick to make the check happen
 
-    val errors = projectErrors(ScalaPlugin.plugin.settingProblemMarkerId)
+    val errors = projectErrors(ScalaConstants.SettingProblemMarkerId)
 
     // on 2.8 an invalid setting is reported twice, so the total number of errors is 3 or 4
     assertTrue("unexpected number of scala problems in project: " + errors, errors.nonEmpty)
@@ -479,7 +482,7 @@ class ClasspathTests {
 
     project.classpathHasChanged() // trick to make the check happen
 
-    val errors1 = projectErrors(ScalaPlugin.plugin.problemMarkerId, ScalaPlugin.plugin.settingProblemMarkerId)
+    val errors1 = projectErrors(ScalaConstants.ProblemMarkerId, ScalaConstants.SettingProblemMarkerId)
 
     assertEquals("unexpected number of scala problems in project: " + errors1, 2, errors1.length)
   }
@@ -495,7 +498,7 @@ class ClasspathTests {
 
     project.classpathHasChanged() // trick to make the check happen
 
-    val errors = projectErrors(ScalaPlugin.plugin.problemMarkerId, ScalaPlugin.plugin.settingProblemMarkerId)
+    val errors = projectErrors(ScalaConstants.ProblemMarkerId, ScalaConstants.SettingProblemMarkerId)
 
     assertEquals("unexpected number of scala problems in project: " + errors, 1, errors.length)
   }
@@ -513,14 +516,14 @@ class ClasspathTests {
     checkMarkers(0, 0)
 
     // two excepted code errors
-    var markers= project.underlying.findMarkers(ScalaPlugin.plugin.problemMarkerId, true, IResource.DEPTH_INFINITE)
+    var markers= project.underlying.findMarkers(ScalaConstants.ProblemMarkerId, true, IResource.DEPTH_INFINITE)
     assertEquals("Unexpected number of scala problems in project", 2, markers.length)
 
     // switch to an invalid classpath
     setRawClasspathAndCheckMarkers(cleanRawClasspath, 0, 1)
 
     // no code errors visible anymore
-    markers= project.underlying.findMarkers(ScalaPlugin.plugin.problemMarkerId, true, IResource.DEPTH_INFINITE)
+    markers= project.underlying.findMarkers(ScalaConstants.ProblemMarkerId, true, IResource.DEPTH_INFINITE)
     assertEquals("Unexpected number of scala problems in project", 0, markers.length)
   }
 
@@ -538,15 +541,15 @@ class ClasspathTests {
   /** Impossible to give a < 2.8 version i
    */
   private def getIncompatibleScalaVersion: String = {
-    if (ScalaPlugin.plugin.shortScalaVer == "2.10") "2.11" else "2.9"
+    if (getTestShortScalaVersion == "2.10") "2.11" else "2.9"
   }
 
   private def getPreviousScalaVersion: String = {
-    if (ScalaPlugin.plugin.shortScalaVer == "2.10") "2.9" else "2.10"
+    if (getTestShortScalaVersion == "2.10") "2.9" else "2.10"
   }
 
   // for these tests' purposes of comparing minors, it's enough to get "none" if the plugin version is unparseable
-  private def getTestShortScalaVersion: String = ScalaPlugin.plugin.shortScalaVer
+  private def getTestShortScalaVersion: String = ScalaPlugin.plugin.shortScalaVersion
 
   /**
    * Set the new classpath and check the number of errors and warnings attached to the project.

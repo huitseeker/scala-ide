@@ -17,7 +17,7 @@ class ColourPreferenceInitializer extends AbstractPreferenceInitializer {
   }
 
   private def doInitializeDefaultPreferences() {
-    val scalaPrefStore = ScalaPlugin.prefStore
+    val scalaPrefStore = ScalaPlugin.plugin.getPreferenceStore()
 
     scalaPrefStore.setDefault(ENABLE_SEMANTIC_HIGHLIGHTING, true)
     scalaPrefStore.setDefault(USE_SYNTACTIC_HINTS, true)

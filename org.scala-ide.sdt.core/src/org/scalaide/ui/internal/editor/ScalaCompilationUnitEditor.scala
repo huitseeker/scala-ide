@@ -25,7 +25,7 @@ trait ScalaCompilationUnitEditor extends JavaEditor with ScalaEditor {
 
   scalaPrefStore.addPropertyChangeListener(preferenceListener)
 
-  protected def scalaPrefStore = ScalaPlugin.prefStore
+  protected def scalaPrefStore = ScalaPlugin.plugin.getPreferenceStore()
   def javaPrefStore = super.getPreferenceStore
 
   override def setSourceViewerConfiguration(configuration: SourceViewerConfiguration) {

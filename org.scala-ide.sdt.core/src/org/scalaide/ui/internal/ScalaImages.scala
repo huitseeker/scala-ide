@@ -6,6 +6,7 @@ import org.eclipse.core.runtime.Platform
 import org.eclipse.jface.resource.ImageDescriptor
 import org.osgi.framework.Bundle
 import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.ScalaConstants
 
 object ScalaImages {
   val MISSING_ICON = ImageDescriptor.getMissingImageDescriptor
@@ -37,7 +38,7 @@ object ScalaImages {
   val CORRECTION_RENAME = fromCoreBundle("/icons/full/obj16/correction_rename.gif")
 
   private def fromCoreBundle(path: String): ImageDescriptor =
-    imageDescriptor(ScalaPlugin.plugin.pluginId, path) getOrElse MISSING_ICON
+    imageDescriptor(ScalaConstants.PluginId, path) getOrElse MISSING_ICON
 
   /**
    * Creates an `Option` holding an `ImageDescriptor` of an image located in an

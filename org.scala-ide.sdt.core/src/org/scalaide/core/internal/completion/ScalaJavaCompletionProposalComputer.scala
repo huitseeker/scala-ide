@@ -5,6 +5,7 @@ import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext
 import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext
 import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.FromScalaPlugin
 import org.scalaide.core.internal.jdt.model.ScalaCompilationUnit
 import java.util.Collections.{ emptyList => javaEmptyList }
 import org.eclipse.jdt.core._
@@ -66,7 +67,7 @@ class ScalaJavaCompletionProposalComputer extends IJavaCompletionProposalCompute
   def computeCompletionProposals(context: ContentAssistInvocationContext, monitor: IProgressMonitor): java.util.List[ICompletionProposal] = {
     context match {
       case jc: JavaContentAssistInvocationContext =>
-        if (ScalaPlugin.plugin.isScalaProject(jc.getProject()))
+        if (FromScalaPlugin.isScalaProject(jc.getProject()))
           jc.getCompilationUnit match {
           case scu: ScalaCompilationUnit => javaEmptyList()
           case _ => mixedInCompletions(jc.getCompilationUnit(), jc.getInvocationOffset(), monitor)

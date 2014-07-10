@@ -12,11 +12,12 @@ import org.eclipse.jdt.launching.JavaRuntime
 import org.eclipse.core.runtime.Path
 import org.scalaide.core.ScalaPlugin.plugin
 import org.scalaide.util.internal.Utils
+import org.scalaide.core.ScalaConstants
 
 object Nature {
 
   def removeScalaLib(jp: IJavaProject) {
-    val scalaLibPath = Path.fromPortableString(plugin.scalaLibId)
+    val scalaLibPath = Path.fromPortableString(ScalaConstants.ScalaLibContId)
     val buf = jp.getRawClasspath filter (_.getPath!= scalaLibPath)
     jp.setRawClasspath(buf, null)
   }
@@ -31,7 +32,7 @@ object Nature {
 
     // Put the Scala classpath container before JRE container
     val buf = ArrayBuffer(jp.getRawClasspath : _*)
-    val scalaLibEntry = JavaCore.newContainerEntry(Path.fromPortableString(plugin.scalaLibId))
+    val scalaLibEntry = JavaCore.newContainerEntry(Path.fromPortableString(ScalaConstants.ScalaLibContId))
     val jreIndex = buf.indexWhere(_.getPath.toPortableString.startsWith(JavaRuntime.JRE_CONTAINER))
     if (jreIndex != -1) {
       buf.insert(jreIndex, scalaLibEntry)
@@ -55,7 +56,7 @@ class Nature extends IProjectNature {
     if (project == null || !project.isOpen)
       return
 
-    updateBuilders(project, List(JavaCore.BUILDER_ID), plugin.builderId)
+    updateBuilders(project, List(JavaCore.BUILDER_ID), ScalaConstants.BuilderId)
 
     Utils tryExecute {
       Nature.addScalaLibAndSave(getProject)
@@ -66,7 +67,7 @@ class Nature extends IProjectNature {
     if (project == null || !project.isOpen)
       return
 
-    updateBuilders(project, List(plugin.builderId), JavaCore.BUILDER_ID)
+    updateBuilders(project, List(ScalaConstants.BuilderId), JavaCore.BUILDER_ID)
 
     Utils tryExecute {
       val jp = JavaCore.create(getProject)

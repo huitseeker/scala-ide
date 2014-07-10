@@ -6,6 +6,8 @@ import org.scalaide.util.internal.ui.DisplayThread
 import org.eclipse.core.runtime.preferences.InstanceScope
 import org.eclipse.ui.PlatformUI
 import org.eclipse.jface.preference.IPreferenceStore
+import org.scalaide.core.FromScalaPlugin
+import org.scalaide.core.ScalaConstants
 import org.scalaide.core.ScalaPlugin
 
 
@@ -13,19 +15,18 @@ object MessageDialog {
   import org.eclipse.jface.dialogs.{ MessageDialog => JFMessageDialog }
   import org.eclipse.swt.widgets.Shell
   def apply(heading: String, message: String, labels: (Int, String)*) =
-    new JFMessageDialog(ScalaPlugin.getShell, heading, null, message, JFMessageDialog.QUESTION, labels.map(_._2).toArray, 0).open()
+    new JFMessageDialog(FromScalaPlugin.getShell, heading, null, message, JFMessageDialog.QUESTION, labels.map(_._2).toArray, 0).open()
   def confirm(heading: String, message: String) =
-    JFMessageDialog.openConfirm(ScalaPlugin.getShell, heading, message)
+    JFMessageDialog.openConfirm(FromScalaPlugin.getShell, heading, message)
   def question(heading: String, message: String) =
-    JFMessageDialog.openQuestion(ScalaPlugin.getShell, heading, message)
+    JFMessageDialog.openQuestion(FromScalaPlugin.getShell, heading, message)
   val CLOSE_ACTION = -1
 }
 
 object StartupDiagnostics extends HasLogger {
-  import ScalaPlugin.plugin
 
-  private val INSTALLED_VERSION_KEY = plugin.pluginId + ".diagnostic.currentPluginVersion"
-  val ASK_DIAGNOSTICS = plugin.pluginId + ".diagnostic.askOnUpgrade"
+  private val INSTALLED_VERSION_KEY = ScalaConstants.PluginId + ".diagnostic.currentPluginVersion"
+  val ASK_DIAGNOSTICS = ScalaConstants.PluginId + ".diagnostic.askOnUpgrade"
 
   private val weavingState = new WeavingStateConfigurer
 
@@ -44,7 +45,7 @@ object StartupDiagnostics extends HasLogger {
     val NEVER_ACTION = 2
     import MessageDialog.CLOSE_ACTION
 
-    val prefStore = plugin.getPreferenceStore
+    val prefStore = ScalaPlugin.plugin.getPreferenceStore
     DisplayThread.asyncExec {
       if (suggestDiagnostics(prefStore)) {
         import org.eclipse.jface.dialogs.IDialogConstants._
@@ -55,14 +56,14 @@ object StartupDiagnostics extends HasLogger {
              |Run setup diagnostics to ensure correct plugin settings?""".stripMargin,
           YES_ACTION -> YES_LABEL, NO_ACTION -> NO_LABEL, NEVER_ACTION -> "Never") match {
             case YES_ACTION =>
-              new DiagnosticDialog(weavingState, ScalaPlugin.getShell).open
+              new DiagnosticDialog(weavingState, FromScalaPlugin.getShell).open
             case NEVER_ACTION =>
               prefStore.setValue(ASK_DIAGNOSTICS, false)
             case NO_ACTION | CLOSE_ACTION =>
           }
-        val currentVersion = plugin.getBundle.getVersion.toString
+        val currentVersion = ScalaPlugin.plugin.getBundle.getVersion.toString
         prefStore.setValue(INSTALLED_VERSION_KEY, currentVersion)
-        InstanceScope.INSTANCE.getNode(ScalaPlugin.plugin.pluginId).flush()
+        InstanceScope.INSTANCE.getNode(ScalaConstants.PluginId).flush()
       }
       ensureWeavingIsEnabled()
     }

@@ -15,7 +15,7 @@ class SurroundSelectionStrategy(sourceViewer: ISourceViewer) extends VerifyKeyLi
   @volatile
   private var activeChars = getConfiguredActiveChars
 
-  ScalaPlugin.prefStore.addPropertyChangeListener(this)
+  ScalaPlugin.plugin.getPreferenceStore().addPropertyChangeListener(this)
 
   private lazy val optionToMapping = Map(
     P_ENABLE_SMART_PARENS -> (('(', ')')),
@@ -55,7 +55,7 @@ class SurroundSelectionStrategy(sourceViewer: ISourceViewer) extends VerifyKeyLi
    *        active, it will surround it with c1,c2 instead of replacing the selection.
    */
   private def getConfiguredActiveChars: Map[Char, Char] = {
-    val store = ScalaPlugin.prefStore
+    val store = ScalaPlugin.plugin.getPreferenceStore()
     for ((option, mapping) <- optionToMapping if store.getBoolean(option)) yield mapping
   }
 

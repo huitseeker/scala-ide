@@ -18,6 +18,7 @@ import org.scalaide.ui.internal.actions.OpenExternalFile
 import org.scalaide.logging.LogManager
 import org.scalaide.core.ScalaPlugin
 import org.scalaide.core.internal.project.ScalaInstallation
+import org.scalaide.core.ScalaConstants
 
 
 class ReportBugDialog(shell: Shell) extends Dialog(shell) {
@@ -38,7 +39,7 @@ class ReportBugDialog(shell: Shell) extends Dialog(shell) {
     messageField.setLayoutData(new GridData(GridData.GRAB_HORIZONTAL | GridData.HORIZONTAL_ALIGN_FILL))
     messageField.setText(
         "Scala plugin version: " + ScalaPlugin.plugin.getBundle.getVersion + "\n\n" +
-        "Bundled Scala compiler version: " + ScalaPlugin.plugin.scalaVer.unparse + "\n\n" +
+        "Bundled Scala compiler version: " + ScalaPlugin.plugin.scalaVersion.unparse + "\n\n" +
         "Scala library version:\t" + ScalaInstallation.platformInstallation.version.unparse + "\n" +
         "Eclipse version: " + Platform.getBundle("org.eclipse.platform").getVersion)
 
@@ -54,7 +55,7 @@ class ReportBugDialog(shell: Shell) extends Dialog(shell) {
     logFileLink.addListener(SWT.Selection, OpenExternalFile(LogManager.logFile))
 
     val reportBugLink = new Link(group2, SWT.NONE)
-    reportBugLink.setText("and <a href=\"" + ScalaPlugin.IssueTracker + "\">report a bug</a>.")
+    reportBugLink.setText("and <a href=\"" + ScalaConstants.IssueTracker + "\">report a bug</a>.")
     reportBugLink.addListener(SWT.Selection, new LinkListener())
 
     control

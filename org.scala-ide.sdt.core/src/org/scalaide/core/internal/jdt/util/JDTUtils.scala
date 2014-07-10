@@ -21,7 +21,7 @@ import org.eclipse.jdt.internal.core.NameLookup
 import org.eclipse.jdt.internal.core.OpenableElementInfo
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart
 import org.eclipse.ui.progress.UIJob
-import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.FromScalaPlugin
 import org.scalaide.util.internal.ReflectionUtils
 
 object JDTUtils {
@@ -72,7 +72,7 @@ object JDTUtils {
 
   def flattenProject(project : IProject) : Iterator[IFile] = {
     try {
-      if (!ScalaPlugin.plugin.isScalaProject(project))
+      if (!FromScalaPlugin.isScalaProject(project))
         return Iterator.empty
 
       val jp = JavaCore.create(project)

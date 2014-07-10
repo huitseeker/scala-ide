@@ -18,6 +18,7 @@ import scala.tools.nsc.settings.ScalaVersion
 import scala.tools.nsc.settings.SpecificScalaVersion
 import sbt.ScalaInstance
 import org.scalaide.core.internal.project.ScalaModule
+import org.scalaide.core.ScalaConstants
 
 class MultiScalaVersionTest {
   // this was deprecated in 2.10, and invalid in 2.11
@@ -77,7 +78,7 @@ class MultiScalaVersionTest {
 
   private def findPreviousScalaInstallation(): Option[ScalaInstallation] = {
     ScalaInstallation.availableInstallations find { installation =>
-      (installation.version, ScalaPlugin.plugin.scalaVer) match {
+      (installation.version, ScalaPlugin.plugin.scalaVersion) match {
         case (ShortScalaVersion(_, minor), ShortScalaVersion(_, pluginMinor)) => minor < pluginMinor
         case _ => false
       }
@@ -85,7 +86,7 @@ class MultiScalaVersionTest {
   }
 
   private def setScalaLibrary(p: ScalaProject, lib: IPath): Unit = {
-    val baseClasspath = p.javaProject.getRawClasspath().filter(_.getPath().toPortableString() != ScalaPlugin.plugin.scalaLibId)
+    val baseClasspath = p.javaProject.getRawClasspath().filter(_.getPath().toPortableString() != ScalaConstants.ScalaLibContId)
     p.javaProject.setRawClasspath(baseClasspath :+ JavaCore.newLibraryEntry(lib, null, null), null)
   }
 }

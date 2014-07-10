@@ -1,7 +1,7 @@
 package org.scalaide.core
 package semantichighlighting
 
-import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.FromScalaPlugin
 import org.scalaide.core.internal.project.ScalaProject
 import org.scalaide.core.internal.jdt.model.ScalaCompilationUnit
 import org.scalaide.util.internal.eclipse.EmptyRegion
@@ -65,7 +65,7 @@ class SemanticHighlightingPositionsTest {
 
   @After
   def deleteProject() {
-    EclipseUtils.workspaceRunnableIn(ScalaPlugin.plugin.workspaceRoot.getWorkspace) { _ =>
+    EclipseUtils.workspaceRunnableIn(FromScalaPlugin.workspaceRoot.getWorkspace) { _ =>
       project.underlying.delete(true, null)
     }
   }

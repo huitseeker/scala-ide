@@ -6,7 +6,7 @@ import org.eclipse.ui.IPageLayout
 import org.eclipse.ui.IPerspectiveFactory
 import org.eclipse.ui.console.IConsoleConstants
 import org.eclipse.ui.navigator.resources.ProjectExplorer
-import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.ScalaConstants
 
 class PerspectiveFactory extends IPerspectiveFactory {
   def createInitialLayout(layout : IPageLayout) = {
@@ -16,14 +16,14 @@ class PerspectiveFactory extends IPerspectiveFactory {
     layout.addActionSet(JavaUI.ID_ACTION_SET)
   }
   private def addShortcuts(layout : IPageLayout) = {
-    layout.addNewWizardShortcut(ScalaPlugin.plugin.projectWizId)
-    layout.addNewWizardShortcut(ScalaPlugin.plugin.netProjectWizId)
+    layout.addNewWizardShortcut(ScalaConstants.ProjectWizId)
+    layout.addNewWizardShortcut(ScalaConstants.NetProjectWizId)
     layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewPackageCreationWizard")
-    layout.addNewWizardShortcut(ScalaPlugin.plugin.classWizId)
-    layout.addNewWizardShortcut(ScalaPlugin.plugin.traitWizId)
-    layout.addNewWizardShortcut(ScalaPlugin.plugin.objectWizId)
-    layout.addNewWizardShortcut(ScalaPlugin.plugin.packageObjectWizId)
-    layout.addNewWizardShortcut(ScalaPlugin.plugin.applicationWizId)
+    layout.addNewWizardShortcut(ScalaConstants.ClassWizId)
+    layout.addNewWizardShortcut(ScalaConstants.TraitWizId)
+    layout.addNewWizardShortcut(ScalaConstants.ObjectWizId)
+    layout.addNewWizardShortcut(ScalaConstants.PackageObjectWizId)
+    layout.addNewWizardShortcut(ScalaConstants.ApplicationWizId)
     layout.addNewWizardShortcut("org.eclipse.jdt.ui.wizards.NewSourceFolderCreationWizard")
     layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.folder")
     layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.file")

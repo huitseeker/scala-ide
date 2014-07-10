@@ -1,7 +1,7 @@
 package org.scalaide.core.sbtbuilder
 
 import org.junit.Test
-import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.internal.ScalaPlugin
 import org.scalaide.core.internal.project.ScalaInstallation
 import org.junit.Assert
 import org.eclipse.core.runtime.Platform

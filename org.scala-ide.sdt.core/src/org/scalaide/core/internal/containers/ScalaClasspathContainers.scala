@@ -2,9 +2,7 @@ package org.scalaide.core.internal.containers
 
 import java.util.Properties
 import java.util.zip.ZipFile
-
 import scala.tools.nsc.settings.ScalaVersion
-
 import org.eclipse.core.resources.ProjectScope
 import org.eclipse.core.runtime.IPath
 import org.eclipse.core.runtime.Path
@@ -36,6 +34,7 @@ import org.scalaide.logging.HasLogger
 import org.scalaide.ui.internal.preferences.PropertyStore
 import org.scalaide.ui.internal.project.ScalaInstallationUIProviders
 import org.scalaide.util.internal.SettingConverterUtil
+import org.scalaide.core.ScalaConstants
 
 abstract class ScalaClasspathContainerInitializer(desc: String) extends ClasspathContainerInitializer with HasLogger {
   def entries: Array[IClasspathEntry]
@@ -43,7 +42,7 @@ abstract class ScalaClasspathContainerInitializer(desc: String) extends Classpat
   override def initialize(containerPath: IPath, project: IJavaProject) = {
     val iProject = project.getProject()
 
-    val storage = new PropertyStore(new ProjectScope(iProject), ScalaPlugin.plugin.pluginId)
+    val storage = new PropertyStore(new ProjectScope(iProject), ScalaConstants.PluginId)
     val setter = new ClasspathContainerSetter(project)
     val usesProjectSettings = storage.getBoolean(SettingConverterUtil.USE_PROJECT_SETTINGS_PREFERENCE)
 
@@ -139,7 +138,7 @@ abstract class ScalaClasspathContainerPage(containerPath: IPath, name: String, o
 
 class ScalaCompilerClasspathContainerPage extends
   ScalaClasspathContainerPage(
-    new Path(ScalaPlugin.plugin.scalaCompilerId),
+    new Path(ScalaConstants.ScalaCompilerContId),
     "ScalaCompilerContainerPage",
     "Scala Compiler container",
     "Scala compiler container") {
@@ -148,7 +147,7 @@ class ScalaCompilerClasspathContainerPage extends
 }
 
 class ScalaLibraryClasspathContainerPage extends
-  ScalaClasspathContainerPage(new Path(ScalaPlugin.plugin.scalaLibId),
+  ScalaClasspathContainerPage(new Path(ScalaConstants.ScalaLibContId),
     "ScalaLibraryContainerPage",
     "Scala Library container",
     "Scala library container") {

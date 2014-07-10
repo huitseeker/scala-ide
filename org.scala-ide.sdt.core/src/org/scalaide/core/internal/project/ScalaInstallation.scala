@@ -10,8 +10,7 @@ import org.eclipse.core.runtime.Path
 import org.eclipse.core.runtime.Platform
 import org.osgi.framework.Bundle
 import org.osgi.framework.Version
-import org.scalaide.core.ScalaPlugin
-import org.scalaide.core.ScalaPlugin.plugin
+import org.scalaide.core.internal.ScalaPlugin.plugin
 import org.scalaide.util.internal.CompilerUtils.ShortScalaVersion
 import org.scalaide.util.internal.eclipse.OSGiUtils
 import xsbti.compile.ScalaInstance
@@ -46,7 +45,7 @@ trait ScalaInstallation {
 
   /** Create an Sbt-compatible ScalaInstance */
   def scalaInstance: ScalaInstance = {
-    val store = ScalaPlugin.plugin.classLoaderStore
+    val store = plugin.classLoaderStore
     val scalaLoader = store.getOrUpdate(this)(new URLClassLoader(allJars.map(_.classJar.toFile.toURI.toURL).toArray, ClassLoader.getSystemClassLoader))
 
     new sbt.ScalaInstance(version.unparse, scalaLoader, library.classJar.toFile, compiler.classJar.toFile, extraJars.map(_.classJar.toFile).toList, None)
@@ -126,7 +125,7 @@ object BundledScalaInstallation {
   def detectBundledInstallations(): List[BundledScalaInstallation] = {
     // find the bundles with the right pattern
     val matchingBundles: List[Bundle] =
-      ScalaPlugin.plugin.getBundle().getBundleContext().getBundles().to[List]
+      plugin.getBundle().getBundleContext().getBundles().to[List]
         .filter { b => ScalaBundleJarsRegex.unapplySeq(b.getSymbolicName()).isDefined }
 
     matchingBundles.flatMap(BundledScalaInstallation(_))

@@ -7,6 +7,7 @@ import org.eclipse.debug.core.IStatusHandler
 import org.eclipse.jface.dialogs.IDialogConstants
 import org.eclipse.jface.dialogs.{ MessageDialog => MD, MessageDialogWithToggle}
 import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.FromScalaPlugin
 import org.scalaide.ui.internal.preferences.CompilerSettings
 import org.scalaide.util.internal.SettingConverterUtil
 import org.scalaide.util.internal.Utils.WithAsInstanceOfOpt
@@ -33,7 +34,7 @@ class CompilerLaunchErrorHandler extends RichStatusHandler {
 
       if (!ScalaPlugin.plugin.headlessMode) {
         val dialog = new MD(
-          ScalaPlugin.getShell,
+          FromScalaPlugin.getShell,
           "Detected problem",
           null,
           status.getMessage + " Continue launch?",

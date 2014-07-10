@@ -106,7 +106,7 @@ class SDTTestProject(project : IProject) {
   }
 
   def addScalaNature() {
-    addNature(ScalaPlugin.plugin.natureId)
+    addNature(ScalaConstants.NatureId)
   }
 
   def addNature(natureId : String) {
@@ -137,7 +137,7 @@ class SDTTestProject(project : IProject) {
   }
 
   def addScalaSystemLibraries() {
-    addToClasspath(JavaCore.newContainerEntry(Path.fromPortableString(ScalaPlugin.plugin.scalaLibId)))
+    addToClasspath(JavaCore.newContainerEntry(Path.fromPortableString(ScalaConstants.ScalaLibContId)))
   }
 
   def findFileInPlugin(plugin : String, file : String) : Path = {

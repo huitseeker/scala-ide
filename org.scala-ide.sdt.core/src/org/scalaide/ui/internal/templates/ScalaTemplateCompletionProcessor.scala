@@ -13,6 +13,7 @@ import org.eclipse.jface.text.templates.GlobalTemplateVariables
 import org.eclipse.jface.text.templates.TemplateContextType
 import org.scalaide.core.ScalaPlugin
 import org.eclipse.jface.text.templates.DocumentTemplateContext
+import org.scalaide.core.ScalaConstants
 
 /**
  * Group template related information instead of being merged/flatten into ScalaPlugin.
@@ -20,11 +21,11 @@ import org.eclipse.jface.text.templates.DocumentTemplateContext
  */
 class ScalaTemplateManager {
 
-  val CONTEXT_TYPE = ScalaPlugin.plugin.pluginId + ".templates"
-  val TEMPLATE_STORE_ID = ScalaPlugin.plugin.pluginId + ".preferences.Templates"
+  val CONTEXT_TYPE = ScalaConstants.PluginId + ".templates"
+  val TEMPLATE_STORE_ID = ScalaConstants.PluginId + ".preferences.Templates"
 
   lazy val templateStore = {
-    val b = new ContributionTemplateStore(contextTypeRegistry, ScalaPlugin.prefStore, TEMPLATE_STORE_ID)
+    val b = new ContributionTemplateStore(contextTypeRegistry, ScalaPlugin.plugin.getPreferenceStore(), TEMPLATE_STORE_ID)
     b.load()
     b
   }

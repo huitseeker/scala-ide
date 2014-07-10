@@ -13,7 +13,7 @@ import org.eclipse.core.runtime.IProgressMonitor
 import org.eclipse.core.runtime.jobs.Job
 import org.eclipse.core.resources.IResource
 import org.eclipse.core.runtime.Status
-import org.scalaide.core.ScalaPlugin.plugin
+import org.scalaide.core.internal.ScalaPlugin.plugin
 import org.eclipse.core.runtime.IPath
 import org.eclipse.jdt.core.IClasspathEntry
 import org.eclipse.jdt.launching.JavaRuntime
@@ -32,13 +32,15 @@ import org.eclipse.jdt.internal.core.JavaProject
 import org.scalaide.core.resources.MarkerFactory
 import org.scalaide.util.internal.eclipse.EclipseUtils
 import org.osgi.framework.Version
-import org.scalaide.core.ScalaPlugin
+//import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.FromScalaPlugin
 import org.scalaide.util.internal.SettingConverterUtil
 import org.scalaide.ui.internal.preferences.ScalaPluginSettings
 import scala.tools.nsc.settings.ScalaVersion
 import org.eclipse.jface.util.StatusHandler
 import org.eclipse.debug.core.DebugPlugin
 import scala.concurrent.Promise
+import org.scalaide.core.ScalaConstants
 
 /** The Scala classpath broken down in the JDK, Scala library and user library.
  *
@@ -158,13 +160,13 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
           cpe.getEntryKind == IClasspathEntry.CPE_SOURCE
       ) cpe.getEntryKind match {
         case IClasspathEntry.CPE_PROJECT =>
-          val depProject = plugin.workspaceRoot.getProject(cpe.getPath.lastSegment)
+          val depProject = FromScalaPlugin.workspaceRoot.getProject(cpe.getPath.lastSegment)
           if (JavaProject.hasJavaNature(depProject)) {
             computeClasspath(JavaCore.create(depProject), true)
           }
         case IClasspathEntry.CPE_LIBRARY =>
           if (cpe.getPath != null) {
-            val absPath = plugin.workspaceRoot.findMember(cpe.getPath)
+            val absPath = FromScalaPlugin.workspaceRoot.findMember(cpe.getPath)
             if (absPath != null)
               path += absPath.getLocation
             else {
@@ -177,7 +179,7 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
           val outputLocation = if (cpeOutput != null) cpeOutput else project.getOutputLocation
 
           if (outputLocation != null) {
-            val absPath = plugin.workspaceRoot.findMember(outputLocation)
+            val absPath = FromScalaPlugin.workspaceRoot.findMember(outputLocation)
             if (absPath != null)
               path += absPath.getLocation
           }
@@ -285,7 +287,7 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
             folder <- Option(fragmentRoot.getUnderlyingResource.asInstanceOf[IFolder])
             if folder.findMember(new Path("scala/Predef.scala")) ne null
             if (folder.getProject != underlying) // only consider a source library if it comes from a different project
-            dependentPrj <- ScalaPlugin.plugin.asScalaProject(folder.getProject)
+            dependentPrj <- plugin.asScalaProject(folder.getProject)
             (srcPath, binFolder) <- dependentPrj.sourceOutputFolders
             if srcPath.getProjectRelativePath == folder.getProjectRelativePath
           } {
@@ -326,8 +328,8 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
       case _                               => false
     }
 
-    val scalaVersion = plugin.scalaVer.unparse
-    val expectedVersion = if (this.isUsingCompatibilityMode) plugin.scalaVer match {
+    val scalaVersion = plugin.scalaVersion.unparse
+    val expectedVersion = if (this.isUsingCompatibilityMode) plugin.scalaVersion match {
       case ShortScalaVersion(major, minor) => {val newMinor = (minor -1); f"$major%d.$newMinor%d"}
       case _ => "none"
     } else scalaVersion
@@ -340,14 +342,14 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
           // if the library is provided by a project in the workspace, disable the warning (the version file is missing anyway)
           Nil
         } else fragmentRoots(0).version match {
-          case Some(v) if (!this.isUsingCompatibilityMode() && ScalaVersion(v) == plugin.scalaVer) =>
+          case Some(v) if (!this.isUsingCompatibilityMode() && ScalaVersion(v) == plugin.scalaVersion) =>
             // exactly the same version, should be from the container. Perfect
             Nil
           case Some(v) if plugin.isCompatibleVersion(ScalaVersion(v), this) =>
             // compatible version (major, minor are the same). Still, add warning message
             (IMarker.SEVERITY_WARNING, s"The version of scala library found in the build path ($v) is different from the one provided by scala IDE ($scalaVersion). Make sure you know what you are doing.") :: Nil
-          case Some(v) if (isBinaryPrevious(plugin.scalaVer, ScalaVersion(v))) => {
-            val status = new Status(IStatus.ERROR, ScalaPlugin.plugin.pluginId, ClasspathErrorPromptStatusHandler.STATUS_CODE_PREV_CLASSPATH, "", null)
+          case Some(v) if (isBinaryPrevious(plugin.scalaVersion, ScalaVersion(v))) => {
+            val status = new Status(IStatus.ERROR, ScalaConstants.PluginId, ClasspathErrorPromptStatusHandler.STATUS_CODE_PREV_CLASSPATH, "", null)
             if (!messageWasShown.getAndSet(true)) try {
               val handler = DebugPlugin.getDefault().getStatusHandler(status)
               if (!classpathContinuation.isCompleted) handler.handleStatus(status, (this, classpathContinuation))
@@ -415,11 +417,11 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
     EclipseUtils.scheduleJob("Update classpath error markers", underlying) { monitor =>
       if (underlying.isOpen()) { // cannot change markers on closed project
         // clean the classpath markers
-        underlying.deleteMarkers(plugin.classpathProblemMarkerId, false, IResource.DEPTH_ZERO)
+        underlying.deleteMarkers(ScalaConstants.ClasspathProblemMarkerId, false, IResource.DEPTH_ZERO)
 
         if (!classpathValid) {
           // delete all other Scala and Java error markers
-          underlying.deleteMarkers(plugin.problemMarkerId, true, IResource.DEPTH_INFINITE)
+          underlying.deleteMarkers(ScalaConstants.ProblemMarkerId, true, IResource.DEPTH_INFINITE)
           underlying.deleteMarkers(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER, true, IResource.DEPTH_INFINITE)
         }
 
@@ -448,5 +450,5 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
     errors.toSeq
   }
 
-  private object cpMarkerFactory extends MarkerFactory(plugin.classpathProblemMarkerId)
+  private object cpMarkerFactory extends MarkerFactory(ScalaConstants.ClasspathProblemMarkerId)
 }

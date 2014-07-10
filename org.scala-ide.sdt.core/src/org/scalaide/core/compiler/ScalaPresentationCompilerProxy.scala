@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicBoolean
 import org.scalaide.util.internal.ui.DisplayThread
 import org.scalaide.util.internal.Utils
 import org.scalaide.core.internal.project.ScalaProject
-import org.scalaide.core.ScalaPlugin
 import scala.reflect.internal.MissingRequirementError
 import scala.reflect.internal.FatalError
 import java.util.Collections.synchronizedList
@@ -15,6 +14,8 @@ import org.eclipse.core.runtime.IStatus
 import org.eclipse.core.runtime.MultiStatus
 import org.eclipse.debug.core.DebugPlugin
 import org.eclipse.core.runtime.Status
+import org.scalaide.core.ScalaConstants
+import org.scalaide.core.FromScalaPlugin
 
 /** Holds a reference to the currently 'live' presentation compiler.
   *
@@ -142,11 +143,11 @@ final class ScalaPresentationCompilerProxy(val project: ScalaProject) extends Ha
     val pcScalaMissingStatuses = new scala.collection.mutable.ListBuffer[IStatus]()
     pcLock.synchronized {
       def updatePcStatus(msg: String, ex: Throwable) = {
-        pcScalaMissingStatuses += new Status(IStatus.ERROR, ScalaPlugin.plugin.pluginId, org.scalaide.ui.internal.handlers.MissingScalaRequirementHandler.STATUS_CODE_SCALA_MISSING, msg, ex)
+        pcScalaMissingStatuses += new Status(IStatus.ERROR, ScalaConstants.PluginId, org.scalaide.ui.internal.handlers.MissingScalaRequirementHandler.STATUS_CODE_SCALA_MISSING, msg, ex)
       }
 
       try {
-        val settings = ScalaPlugin.defaultScalaSettings()
+        val settings = FromScalaPlugin.defaultScalaSettings()
         project.initializeCompilerSettings(settings, isPCSetting(settings))
         val pc = new ScalaPresentationCompiler(project, settings)
         logger.debug("Presentation compiler classpath: " + pc.classPath)
@@ -175,7 +176,7 @@ final class ScalaPresentationCompilerProxy(val project: ScalaProject) extends Ha
         if (!messageShown && pcScalaMissingStatuses.nonEmpty) {
           val firstStatus = pcScalaMissingStatuses.head
           val statuses: Array[IStatus] = pcScalaMissingStatuses.tail.toArray
-          val status = new MultiStatus(ScalaPlugin.plugin.pluginId, org.scalaide.ui.internal.handlers.MissingScalaRequirementHandler.STATUS_CODE_SCALA_MISSING, statuses, firstStatus.getMessage(), firstStatus.getException())
+          val status = new MultiStatus(ScalaConstants.PluginId, org.scalaide.ui.internal.handlers.MissingScalaRequirementHandler.STATUS_CODE_SCALA_MISSING, statuses, firstStatus.getMessage(), firstStatus.getException())
           val handler = DebugPlugin.getDefault().getStatusHandler(status)
           // Don't allow asyncExec bec. of the concurrent nature of this call,
           // we're create()-ing instances repeatedly otherwise

@@ -9,6 +9,7 @@ import org.scalaide.util.internal.eclipse.EclipseUtils._
 import org.scalaide.util.internal.Utils._
 import org.scalaide.logging.HasLogger
 import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.FromScalaPlugin
 import scalariform.formatter.ScalaFormatter
 import org.eclipse.core.resources._
 import org.eclipse.debug.core.DebugPlugin
@@ -19,6 +20,7 @@ import org.eclipse.jface.viewers._
 import org.eclipse.ui.ide.IDE
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard
 import org.eclipse.ui.IWorkbench
+import org.scalaide.core.ScalaConstants
 
 object NewApplicationWizard {
 
@@ -109,7 +111,7 @@ class NewApplicationWizard extends BasicNewResourceWizard with HasLogger {
 
     val launchManager = DebugPlugin.getDefault.getLaunchManager
     val launchName = launchManager.generateLaunchConfigurationName(typeName)
-    val launchType = launchManager.getLaunchConfigurationType(ScalaPlugin.plugin.launchTypeId)
+    val launchType = launchManager.getLaunchConfigurationType(ScalaConstants.LaunchTypeId)
 
     val launchConfig = launchType.newInstance(null, launchName)
     launchConfig.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.underlying.getName)
@@ -140,7 +142,7 @@ class NewApplicationWizard extends BasicNewResourceWizard with HasLogger {
 
   private def getPackageFragments(project: IProject): List[IPackageFragment] =
     for {
-      packageFragmentRoot <- ScalaPlugin.plugin.getJavaProject(project).getAllPackageFragmentRoots.toList
+      packageFragmentRoot <- FromScalaPlugin.getJavaProject(project).getAllPackageFragmentRoots.toList
       if packageFragmentRoot.getKind == IPackageFragmentRoot.K_SOURCE
       child <- packageFragmentRoot.getChildren
       packageFragment <- child.asInstanceOfOpt[IPackageFragment]

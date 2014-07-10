@@ -48,8 +48,8 @@ import org.eclipse.swt.layout.GridLayout
 import org.eclipse.swt.widgets.Composite
 import collection.Seq
 import collection.mutable.Buffer
-import org.scalaide.core.ScalaPlugin._
-import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.ScalaPlugin.plugin
+import org.scalaide.core.FromScalaPlugin
 import org.scalaide.core.internal.formatter.ScalaFormatterCleanUpProvider
 import org.scalaide.core.internal.jdt.model.ScalaSourceFile
 import org.scalaide.logging.HasLogger
@@ -434,7 +434,7 @@ abstract class AbstractNewElementWizardPage extends NewTypeWizardPage(1, "") wit
         def getContents() = underlying.getContents()
       }
 
-      val scalaProject = ScalaPlugin.plugin.asScalaProject(parentCU.getJavaProject.getProject).get
+      val scalaProject = plugin.asScalaProject(parentCU.getJavaProject.getProject).get
 
       scalaProject.presentationCompiler { compiler =>
         compiler.askOption[Unit] { () =>
@@ -525,7 +525,7 @@ abstract class AbstractNewElementWizardPage extends NewTypeWizardPage(1, "") wit
       val project = pack.getJavaProject
       val scalaProject = plugin.asScalaProject(project.getProject)
       try {
-        if (!plugin.isScalaProject(project.getProject)) {
+        if (!FromScalaPlugin.isScalaProject(project.getProject)) {
           val msg = project.getElementName + " is not a Scala project"
           logger.info(msg)
           status.setError(msg)

@@ -4,7 +4,6 @@ import java.io.File
 import java.util.zip.ZipFile
 import scala.collection.JavaConverters.enumerationAsScalaIteratorConverter
 import org.eclipse.core.runtime.SubMonitor
-import org.scalaide.core.ScalaPlugin.plugin
 import org.scalaide.core.internal.project.ScalaProject
 import org.scalaide.ui.internal.preferences
 import org.scalaide.ui.internal.preferences.ScalaPluginSettings.compileOrder
@@ -24,10 +23,10 @@ import xsbti.Maybe
 import xsbti.Reporter
 import xsbti.compile._
 import org.scalaide.core.internal.project.ScalaInstallation
-import org.scalaide.core.ScalaPlugin
 import scala.tools.nsc.settings.SpecificScalaVersion
 import scala.tools.nsc.settings.ScalaVersion
 import scala.tools.nsc.settings.SpecificScalaVersion
+import org.scalaide.core.internal.ScalaPlugin
 
 /** Inputs-like class, but not implementing xsbti.compile.Inputs.
  *
@@ -44,7 +43,7 @@ class SbtInputs(installation: ScalaInstallation,
 
   def cache = CompilerCache.fresh // May want to explore caching possibilities.
 
-  private val allProjects = project +: project.transitiveDependencies.flatMap(plugin.asScalaProject)
+  private val allProjects = project +: project.transitiveDependencies.flatMap(ScalaPlugin.plugin.asScalaProject)
 
   def analysisMap(f: File): Maybe[Analysis] =
     if (f.isFile)

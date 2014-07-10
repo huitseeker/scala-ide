@@ -1,7 +1,7 @@
 package org.scalaide.logging
 
 import org.eclipse.jface.util.PropertyChangeEvent
-import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.internal.ScalaPlugin
 import org.scalaide.logging.log4j.Log4JFacade
 import org.scalaide.logging.ui.preferences.LoggingPreferenceConstants._
 import org.scalaide.util.internal.eclipse.SWTUtils

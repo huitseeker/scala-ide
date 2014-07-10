@@ -1,6 +1,5 @@
 package org.scalaide.util.internal.eclipse
 
-import org.scalaide.core.ScalaPlugin.plugin
 import org.scalaide.util.internal.eclipse.EclipseUtils.workspaceRunnableIn
 import scala.tools.nsc.io.AbstractFile
 import org.eclipse.core.filebuffers.FileBuffers
@@ -18,6 +17,7 @@ import org.eclipse.jdt.internal.core.builder.JavaBuilder
 import org.eclipse.core.runtime.IPath
 import org.eclipse.core.internal.resources.ResourceException
 import java.io.File
+import org.scalaide.core.ScalaConstants
 
 object FileUtils {
 
@@ -47,26 +47,26 @@ object FileUtils {
 
   def clearBuildErrors(file : IFile, monitor : IProgressMonitor) =
     try {
-      file.deleteMarkers(plugin.problemMarkerId, true, IResource.DEPTH_INFINITE)
+      file.deleteMarkers(ScalaConstants.ProblemMarkerId, true, IResource.DEPTH_INFINITE)
     } catch {
       case _ : ResourceException =>
     }
 
   def clearTasks(file : IFile, monitor : IProgressMonitor) =
     try {
-      file.deleteMarkers(plugin.taskMarkerId, true, IResource.DEPTH_INFINITE)
+      file.deleteMarkers(ScalaConstants.TaskMarkerId, true, IResource.DEPTH_INFINITE)
     } catch {
       case _ : ResourceException =>
     }
 
   def findBuildErrors(file : IResource) : Seq[IMarker] =
-    file.findMarkers(plugin.problemMarkerId, true, IResource.DEPTH_INFINITE)
+    file.findMarkers(ScalaConstants.ProblemMarkerId, true, IResource.DEPTH_INFINITE)
 
   def hasBuildErrors(file : IResource) : Boolean =
-    file.findMarkers(plugin.problemMarkerId, true, IResource.DEPTH_INFINITE).exists(_.getAttribute(IMarker.SEVERITY) == IMarker.SEVERITY_ERROR)
+    file.findMarkers(ScalaConstants.ProblemMarkerId, true, IResource.DEPTH_INFINITE).exists(_.getAttribute(IMarker.SEVERITY) == IMarker.SEVERITY_ERROR)
 
   def task(file: IFile, tag: String, msg: String, priority: String, offset: Int, length: Int, line: Int, monitor: IProgressMonitor) = {
-    val mrk = file.createMarker(plugin.taskMarkerId)
+    val mrk = file.createMarker(ScalaConstants.TaskMarkerId)
     val values = new Array[AnyRef](taskMarkerAttributeNames.length)
 
     val prioNum = priority match {

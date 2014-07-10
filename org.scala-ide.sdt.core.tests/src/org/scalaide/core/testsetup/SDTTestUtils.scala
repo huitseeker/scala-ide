@@ -234,7 +234,7 @@ object SDTTestUtils extends HasLogger {
     names map (n => simulator.createProjectInWorkspace(n, true))
 
   def deleteProjects(projects: ScalaProject*) {
-    EclipseUtils.workspaceRunnableIn(ScalaPlugin.plugin.workspaceRoot.getWorkspace) { _ =>
+    EclipseUtils.workspaceRunnableIn(FromScalaPlugin.workspaceRoot.getWorkspace) { _ =>
       projects foreach (_.underlying.delete(true, null))
     }
   }
@@ -278,7 +278,7 @@ object SDTTestUtils extends HasLogger {
       }
       projectSetup.project.presentationCompiler { c => f(c) }
     }
-    finally EclipseUtils.workspaceRunnableIn(ScalaPlugin.plugin.workspaceRoot.getWorkspace) { _ =>
+    finally EclipseUtils.workspaceRunnableIn(FromScalaPlugin.workspaceRoot.getWorkspace) { _ =>
       projectSetup.project.underlying.delete(true, null)
     }
   }

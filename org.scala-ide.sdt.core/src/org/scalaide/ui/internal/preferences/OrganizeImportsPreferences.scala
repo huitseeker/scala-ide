@@ -34,6 +34,7 @@ import org.eclipse.jface.preference.RadioGroupFieldEditor
 import org.eclipse.jface.preference.FieldEditor
 import org.eclipse.jface.preference.BooleanFieldEditor
 import org.eclipse.core.resources.ProjectScope
+import org.scalaide.core.ScalaConstants
 
 
 
@@ -53,8 +54,8 @@ class OrganizeImportsPreferencesPage extends PropertyPage with IWorkbenchPrefere
   }
 
   private def initUnderlyingPreferenceStore() {
-    val pluginId = ScalaPlugin.plugin.pluginId
-    val scalaPrefStore = ScalaPlugin.prefStore
+    val pluginId = ScalaConstants.PluginId
+    val scalaPrefStore = ScalaPlugin.plugin.getPreferenceStore()
     setPreferenceStore(getElement match {
       case project: IProject => new PropertyStore(new ProjectScope(project), pluginId)
       case project: IJavaProject => new PropertyStore(new ProjectScope(project.getProject), pluginId)
@@ -195,7 +196,7 @@ class OrganizeImportsPreferencesPage extends PropertyPage with IWorkbenchPrefere
   override def performOk() = {
     super.performOk()
     fieldEditors.foreach(_.store)
-    InstanceScope.INSTANCE.getNode(ScalaPlugin.plugin.pluginId).flush()
+    InstanceScope.INSTANCE.getNode(ScalaConstants.PluginId).flush()
     true
   }
 }
@@ -216,10 +217,10 @@ object OrganizeImportsPreferences extends Enumeration {
   val omitScalaPackage = PREFIX +".scalapackage"
 
   private def getPreferenceStore(project: IProject): IPreferenceStore = {
-    val workspaceStore = ScalaPlugin.prefStore
-    val projectStore = new PropertyStore(new ProjectScope(project), ScalaPlugin.plugin.pluginId)
+    val workspaceStore = ScalaPlugin.plugin.getPreferenceStore()
+    val projectStore = new PropertyStore(new ProjectScope(project), ScalaConstants.PluginId)
     val useProjectSettings = projectStore.getBoolean(USE_PROJECT_SPECIFIC_SETTINGS_KEY)
-    val prefStore = if (useProjectSettings) projectStore else ScalaPlugin.prefStore
+    val prefStore = if (useProjectSettings) projectStore else workspaceStore
     prefStore
   }
 
@@ -250,7 +251,7 @@ class OrganizeImportsPreferencesInitializer extends AbstractPreferenceInitialize
   def initializeDefaultPreferences() : Unit = {
 
     Utils.tryExecute {
-      val node = DefaultScope.INSTANCE.getNode(ScalaPlugin.plugin.pluginId)
+      val node = DefaultScope.INSTANCE.getNode(ScalaConstants.PluginId)
       node.put(OrganizeImportsPreferences.omitScalaPackage, "false")
       node.put(OrganizeImportsPreferences.groupsKey, "java$scala$org$com")
       node.put(OrganizeImportsPreferences.wildcardsKey, "scalaz$scalaz.Scalaz")

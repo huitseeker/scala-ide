@@ -18,7 +18,7 @@ abstract class EditorPainter(viewer: ISourceViewer, enablePreference: String) ex
     with IPainter with PaintListener with IPropertyChangeListener {
 
   protected val widget = viewer.getTextWidget()
-  protected val store = ScalaPlugin.prefStore
+  protected val store = ScalaPlugin.plugin.getPreferenceStore()
 
   private var isActive = false
   private var isEnabled = store.getBoolean(enablePreference)

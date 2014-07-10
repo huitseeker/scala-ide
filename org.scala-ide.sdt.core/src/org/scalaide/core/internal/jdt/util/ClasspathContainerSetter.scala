@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.JavaCore
 import org.eclipse.core.runtime.Path
 import java.io.File
 import org.eclipse.core.runtime.Status
+import org.scalaide.core.ScalaConstants
 
 trait ScalaClasspathContainerHandler extends HasLogger {
 
@@ -63,8 +64,8 @@ class ClasspathContainerSetter(val javaProject: IJavaProject) extends ScalaClass
   override def containerUpdater(containerPath: IPath, container: IClasspathContainer) = (new ScalaLibraryClasspathContainerInitializer()).requestClasspathContainerUpdate(containerPath, javaProject, container)
 
   def descOfScalaPath(path: IPath) =
-    if (path.toPortableString() == ScalaPlugin.plugin.scalaLibId) "Scala Library container"
-    else if (path.toPortableString() == ScalaPlugin.plugin.scalaCompilerId) "Scala Compiler container"
+    if (path.toPortableString() == ScalaConstants.ScalaLibContId) "Scala Library container"
+    else if (path.toPortableString() == ScalaConstants.ScalaCompilerContId) "Scala Compiler container"
     else "Scala Container"
 
   def bestScalaBundleForVersion(scalaVersion: ScalaVersion): Option[ScalaInstallation] = {

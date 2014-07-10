@@ -27,7 +27,7 @@ import org.eclipse.swt.widgets.Button
 import org.eclipse.swt.SWT
 import org.eclipse.ui.model.WorkbenchViewerComparator
 import org.eclipse.ui.model.BaseWorkbenchContentProvider
-import org.scalaide.core.ScalaPlugin
+import org.scalaide.core.FromScalaPlugin
 
 class MoveClassRefactoringConfigurationPage(
   resourceToMove: IResource,
@@ -36,7 +36,7 @@ class MoveClassRefactoringConfigurationPage(
   setMoveOnlySelectedClass: Boolean => Unit) extends UserInputWizardPage("MoveResourcesRefactoringConfigurationPage") {
 
   lazy val originatingPackage = {
-    val javaProject = ScalaPlugin.plugin.getJavaProject(resourceToMove.getProject)
+    val javaProject = FromScalaPlugin.getJavaProject(resourceToMove.getProject)
     val pf = javaProject.findPackageFragment(resourceToMove.getParent().getFullPath())
     pf.getElementName()
   }

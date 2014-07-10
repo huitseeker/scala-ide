@@ -36,7 +36,7 @@ class TodoBuilderTest {
 
     val units = compilationUnits("test/foo/ClassA.scala")
     val allTasks = units.map { unit =>
-      val tasks = unit.getUnderlyingResource().findMarkers(ScalaPlugin.plugin.taskMarkerId, false, IResource.DEPTH_INFINITE)
+      val tasks = unit.getUnderlyingResource().findMarkers(ScalaConstants.TaskMarkerId, false, IResource.DEPTH_INFINITE)
       println("tasks: %s: %s".format(unit, tasks.toList))
       tasks
     }.flatten

@@ -37,6 +37,7 @@ import scalariform.formatter._
 import scalariform.formatter.preferences._
 import org.scalaide.logging.HasLogger
 import org.eclipse.core.resources.ProjectScope
+import org.scalaide.core.ScalaConstants
 
 class FormatterPreferencePage extends PropertyPage with IWorkbenchPreferencePage with HasLogger {
   import FormatterPreferencePage._
@@ -217,8 +218,8 @@ class FormatterPreferencePage extends PropertyPage with IWorkbenchPreferencePage
   }
 
   private def initUnderlyingPreferenceStore() {
-    val pluginId = ScalaPlugin.plugin.pluginId
-    val scalaPrefStore = ScalaPlugin.prefStore
+    val pluginId = ScalaConstants.PluginId
+    val scalaPrefStore = ScalaPlugin.plugin.getPreferenceStore()
     setPreferenceStore(getElement match {
       case project: IProject => new PropertyStore(new ProjectScope(project), pluginId)
       case project: IJavaProject => new PropertyStore(new ProjectScope(project.getProject), pluginId)
@@ -313,7 +314,7 @@ class FormatterPreferencePage extends PropertyPage with IWorkbenchPreferencePage
   override def performOk() = {
     super.performOk()
     overlayStore.propagate()
-    InstanceScope.INSTANCE.getNode(ScalaPlugin.plugin.pluginId).flush()
+    InstanceScope.INSTANCE.getNode(ScalaConstants.PluginId).flush()
     true
   }
 
