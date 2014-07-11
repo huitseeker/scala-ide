@@ -11,7 +11,6 @@ import org.scalaide.ui.internal.preferences.CompilerSettings
 import org.scalaide.util.internal.SettingConverterUtil
 import org.scalaide.util.internal.Utils.WithAsInstanceOfOpt
 import org.scalaide.util.internal.CompilerUtils.ShortScalaVersion
-import scala.concurrent.Promise
 import scala.tools.nsc.settings.ScalaVersion
 import org.scalaide.ui.internal.preferences.CompilerSettings
 import org.scalaide.util.internal.ui.UIStatusesConverter
@@ -20,8 +19,10 @@ import org.scalaide.core.internal.project.ScalaInstallationChoice
 import org.scalaide.util.internal.CompilerUtils
 import org.eclipse.ui.dialogs.ElementListSelectionDialog
 import org.scalaide.logging.HasLogger
-import org.scalaide.ui.internal.project.ScalaInstallationChoiceListDialog
 import org.scalaide.util.internal.Utils
+import org.eclipse.ui.internal.dialogs.PropertyDialog
+import org.scalaide.util.internal.ui.DisplayThread
+import org.eclipse.ui.internal.dialogs.PropertyPageManager
 
 object BadScalaInstallationPromptStatusHandler {
 
@@ -36,11 +37,7 @@ object BadScalaInstallationPromptStatusHandler {
 class BadScalaInstallationPromptStatusHandler extends RichStatusHandler with HasLogger {
 
   def doHandleStatus(status: IStatus, source: Object) = {
-    val (scalaProject, continuation)  = source match {
-      case (p: ScalaProject, c: Promise[() => Unit]) => (Some(p), Some(c))
-      case (_, c: Promise[()=> Unit]) => (None, Some(c))
-      case _ => (None, None)
-    }
+    val scalaProject = PartialFunction.condOpt(source){case (p: ScalaProject) => p}
     val shell = ScalaPlugin.getShell
 
     val title = "Wrong Scala library version detected in this project"
@@ -49,6 +46,7 @@ class BadScalaInstallationPromptStatusHandler extends RichStatusHandler with Has
 
     if (scalaProject.isDefined) {
       val project = scalaProject.get
+      val javaProject = project.javaProject
       val severity = UIStatusesConverter.MessageDialogOfIStatus(status.getSeverity())
       val dialog = new MD(
         shell,
@@ -61,15 +59,13 @@ class BadScalaInstallationPromptStatusHandler extends RichStatusHandler with Has
       dialog.open()
       val buttonId = dialog.getReturnCode()
       if (buttonId == IDialogConstants.OK_ID) {
-        val installationChoiceList = ScalaInstallationChoiceListDialog(shell, project)
-        val rCode = installationChoiceList.open()
-        val res = installationChoiceList.getInstallationChoice()
-        // We need to pass around a continuation, because the SettingConverterUtil.SCALA_DESIRED property has a Listener that, given the wrong astral alignement
-        // triggers a check too early (in turn triggering the current dialog), even though the property change is supposed to fix the issue in the first place.
-        if (res.isDefined) continuation.get trySuccess { () => Utils.tryExecute(project.projectSpecificStorage.setValue(SettingConverterUtil.SCALA_DESIRED_INSTALLATION, res.get.toString())) }
-        else continuation.get trySuccess { () => }
-      } else continuation.get trySuccess { () => }
-    } else continuation map { _ failure (new IllegalArgumentException) }
+            // This works, but it conflicts with any preexisting Preference page
+            // PreferencesUtil.createPropertyDialogOn(shell, javaProject.getProject(), CompilerSettings.PAGE_ID, null, null).open()) )
+            val pd = PropertyDialog.createDialogOn(shell, CompilerSettings.PAGE_ID, javaProject.getProject())
+            pd.open()
+            pd
+      }
+    }
   }
 
 }

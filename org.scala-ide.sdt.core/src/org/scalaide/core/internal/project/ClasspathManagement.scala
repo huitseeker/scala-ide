@@ -38,7 +38,6 @@ import org.scalaide.ui.internal.preferences.ScalaPluginSettings
 import scala.tools.nsc.settings.ScalaVersion
 import org.eclipse.jface.util.StatusHandler
 import org.eclipse.debug.core.DebugPlugin
-import scala.concurrent.Promise
 
 /** The Scala classpath broken down in the JDK, Scala library and user library.
  *
@@ -314,10 +313,8 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
     classpathHasBeenChecked = true
   }
 
-  private var classpathContinuation = Promise[() => Unit]
   private var messageWasShown = new java.util.concurrent.atomic.AtomicBoolean(false)
   private def validateScalaLibrary(fragmentRoots: Seq[ScalaLibrary]): Seq[(Int, String)] = {
-    import scala.concurrent.ExecutionContext.Implicits.global
     import org.scalaide.util.internal.CompilerUtils._
     import org.scalaide.ui.internal.handlers.BadScalaInstallationPromptStatusHandler
 
@@ -352,17 +349,10 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
             val handlerSuffix = "Configure a Scala Installation for this specific project ?"
             val markerSuffix = "Please set a Scala Installation in this project's compiler Options"
             val status = new Status(IStatus.ERROR, ScalaPlugin.plugin.pluginId, BadScalaInstallationPromptStatusHandler.STATUS_CODE_PREV_CLASSPATH, msg + handlerSuffix, null)
-            try {
-             if (!messageWasShown.getAndSet(true)) {
-              val handler = DebugPlugin.getDefault().getStatusHandler(status)
-                if (!classpathContinuation.isCompleted) handler.handleStatus(status, (this, classpathContinuation))
-                classpathContinuation.future onSuccess {
-                case f => f()
-                }
-             }
+            val handler = DebugPlugin.getDefault().getStatusHandler(status)
+            handler.handleStatus(status, this)
              // Previous version, and the XSource flag isn't there already : warn and suggest fix using Xsource
-             (IMarker.SEVERITY_ERROR, msg + markerSuffix) :: Nil
-            } finally { classpathContinuation = Promise[() => Unit]; messageWasShown.set(false) }
+            (IMarker.SEVERITY_ERROR, msg + markerSuffix) :: Nil
           }
           case Some(v) => {
             // incompatible version
@@ -447,7 +437,6 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
     val badEntries = mutable.ListBuffer[(IPath, ScalaVersion)]()
     val msgSuffix = "In case this report is mistaken, this check can be disabled in the compiler preference page. "
 
-
     for (entry <- entries if entry ne null) {
       entry.lastSegment() match {
         case VersionInFile(version) =>
@@ -466,13 +455,8 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
       val msg = s"Some entries ($badEntriesString) for ${this.underlying.getName()} are cross-compiled with incompatible versions of Scala ($versionsString). "
       val handlerSuffix = "Configure a Scala Installation for this specific project ?"
       val status = new Status(IStatus.ERROR, ScalaPlugin.plugin.pluginId, BadScalaInstallationPromptStatusHandler.STATUS_CODE_PREV_CLASSPATH, msg + msgSuffix + handlerSuffix, null)
-      try{
-        val handler = DebugPlugin.getDefault().getStatusHandler(status)
-        if (!classpathContinuation.isCompleted) handler.handleStatus(status, (this, classpathContinuation))
-          classpathContinuation.future onSuccess {
-            case f => f()
-          }
-      } finally { classpathContinuation = Promise[() => Unit]}
+      val handler = DebugPlugin.getDefault().getStatusHandler(status)
+      handler.handleStatus(status, this)
     }
     errors.toSeq
   }

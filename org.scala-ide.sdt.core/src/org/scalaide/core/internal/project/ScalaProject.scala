@@ -616,6 +616,7 @@ class ScalaProject private (val underlying: IProject) extends ClasspathManagemen
       }
     )
     updater()
+    classpathHasChanged()
     projectSpecificStorage.addPropertyChangeListener(compilerSettingsListener)
   }
 
