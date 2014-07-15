@@ -18,12 +18,12 @@ object ScalaPlugin {
 }
 
 trait ScalaPlugin extends AbstractUIPlugin with HasLogger {
-  
+
   import ScalaConstants._
 
   lazy val noTimeoutMode = System.getProperty(NoTimeoutsProperty) ne null
   lazy val headlessMode = System.getProperty(HeadlessProperty) ne null
-  
+
   // runtime Scala
   lazy val scalaVersion = ScalaVersion.current
   lazy val shortScalaVersion = CompilerUtils.shortString(scalaVersion)
@@ -63,5 +63,5 @@ trait ScalaPlugin extends AbstractUIPlugin with HasLogger {
       }
     }
   }
-  
+
 }

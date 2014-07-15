@@ -70,7 +70,7 @@ class ClasspathTests {
     projectStore.setValue(SettingConverterUtil.USE_PROJECT_SETTINGS_PREFERENCE, true)
     projectStore.save()
   }
-  
+
   private def prefStore = ScalaPlugin.plugin.getPreferenceStore()
 
   @After

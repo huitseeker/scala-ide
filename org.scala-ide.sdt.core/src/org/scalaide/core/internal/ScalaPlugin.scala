@@ -70,7 +70,7 @@ object ScalaPlugin {
 
 class ScalaPlugin extends org.scalaide.core.ScalaPlugin with PluginLogConfigurator with IResourceChangeListener with IElementChangedListener with HasLogger {
   import CompilerUtils.{ ShortScalaVersion, isBinaryPrevious, isBinarySame }
-  
+
   import org.scalaide.core.ScalaConstants._
 
 //
@@ -97,7 +97,7 @@ class ScalaPlugin extends org.scalaide.core.ScalaPlugin with PluginLogConfigurat
   lazy val sbtCompilerInterface = OSGiUtils.pathInBundle(sbtCompilerInterfaceBundle, "/")
 
   lazy val templateManager = new ScalaTemplateManager()
-  
+
 
   override def start(context: BundleContext) = {
     ScalaPlugin.plugin = this

@@ -27,7 +27,7 @@ import org.scalaide.core.ScalaConstants
 import org.scalaide.core.FromScalaPlugin
 
 class ScalaBuilder extends IncrementalProjectBuilder with JDTBuilderFacade with HasLogger {
-  
+
   import org.scalaide.core.ScalaPlugin.plugin
 
   override def project = getProject()

@@ -174,7 +174,7 @@ class ScalaSourceViewerConfiguration(
   override def getAutoEditStrategies(sourceViewer: ISourceViewer, contentType: String): Array[IAutoEditStrategy] = {
     def prefProvider = new JdtPreferenceProvider(getProject)
     val partitioning = getConfiguredDocumentPartitioning(sourceViewer)
-    
+
     // TODO: why not using the defined scalaPrefStore, javaPrefStore or combinedPrefStore?
     val prefStore = ScalaPlugin.plugin.getPreferenceStore()
 

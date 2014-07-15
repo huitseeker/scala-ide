@@ -49,7 +49,7 @@ object CompilerSettingsTest {
 class CompilerSettingsTest {
   import CompilerSettingsTest.project
   val projectScope = new ProjectScope(project.underlying)
-  
+
   private def prefStore = ScalaPlugin.plugin.getPreferenceStore()
 
   @After

@@ -15,11 +15,11 @@ object FromScalaPlugin {
   def defaultScalaSettings(errorFn: String => Unit = Console.println): Settings = new Settings(errorFn)
 
   import org.scalaide.core.ScalaConstants._
-  
-    
+
+
 
   def getJavaProject(project: IProject) = JavaCore.create(project)
 
-  
+
 
 }
