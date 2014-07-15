@@ -160,13 +160,13 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
           cpe.getEntryKind == IClasspathEntry.CPE_SOURCE
       ) cpe.getEntryKind match {
         case IClasspathEntry.CPE_PROJECT =>
-          val depProject = FromScalaPlugin.workspaceRoot.getProject(cpe.getPath.lastSegment)
+          val depProject = EclipseUtils.workspaceRoot.getProject(cpe.getPath.lastSegment)
           if (JavaProject.hasJavaNature(depProject)) {
             computeClasspath(JavaCore.create(depProject), true)
           }
         case IClasspathEntry.CPE_LIBRARY =>
           if (cpe.getPath != null) {
-            val absPath = FromScalaPlugin.workspaceRoot.findMember(cpe.getPath)
+            val absPath = EclipseUtils.workspaceRoot.findMember(cpe.getPath)
             if (absPath != null)
               path += absPath.getLocation
             else {
@@ -179,7 +179,7 @@ trait ClasspathManagement extends HasLogger { self: ScalaProject =>
           val outputLocation = if (cpeOutput != null) cpeOutput else project.getOutputLocation
 
           if (outputLocation != null) {
-            val absPath = FromScalaPlugin.workspaceRoot.findMember(outputLocation)
+            val absPath = EclipseUtils.workspaceRoot.findMember(outputLocation)
             if (absPath != null)
               path += absPath.getLocation
           }

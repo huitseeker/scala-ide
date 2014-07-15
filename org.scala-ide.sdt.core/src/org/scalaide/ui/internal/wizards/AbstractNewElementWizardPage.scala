@@ -53,6 +53,7 @@ import org.scalaide.core.FromScalaPlugin
 import org.scalaide.core.internal.formatter.ScalaFormatterCleanUpProvider
 import org.scalaide.core.internal.jdt.model.ScalaSourceFile
 import org.scalaide.logging.HasLogger
+import org.scalaide.core.internal.project.ScalaProject
 
 abstract class AbstractNewElementWizardPage extends NewTypeWizardPage(1, "") with HasLogger {
 
@@ -525,7 +526,7 @@ abstract class AbstractNewElementWizardPage extends NewTypeWizardPage(1, "") wit
       val project = pack.getJavaProject
       val scalaProject = plugin.asScalaProject(project.getProject)
       try {
-        if (!FromScalaPlugin.isScalaProject(project.getProject)) {
+        if (!ScalaProject.isScalaProject(project.getProject)) {
           val msg = project.getElementName + " is not a Scala project"
           logger.info(msg)
           status.setError(msg)

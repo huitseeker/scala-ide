@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement
 import org.eclipse.jdt.core.dom.ClassInstanceCreation
 import org.eclipse.jface.text.contentassist.ICompletionProposal
 import org.scalaide.core.completion.CompletionContext
+import org.scalaide.core.internal.project.ScalaProject
 
 /** A completion proposal for Java sources. This adds mixed-in concrete members to scope
  *  completions in Java.
@@ -67,7 +68,7 @@ class ScalaJavaCompletionProposalComputer extends IJavaCompletionProposalCompute
   def computeCompletionProposals(context: ContentAssistInvocationContext, monitor: IProgressMonitor): java.util.List[ICompletionProposal] = {
     context match {
       case jc: JavaContentAssistInvocationContext =>
-        if (FromScalaPlugin.isScalaProject(jc.getProject()))
+        if (ScalaProject.isScalaProject(jc.getProject()))
           jc.getCompilationUnit match {
           case scu: ScalaCompilationUnit => javaEmptyList()
           case _ => mixedInCompletions(jc.getCompilationUnit(), jc.getInvocationOffset(), monitor)

@@ -14,6 +14,7 @@ import org.scalaide.util.internal.Utils.WithAsInstanceOfOpt
 import org.scalaide.core.internal.launching.ScalaLaunchDelegate
 import java.util.concurrent.atomic.AtomicBoolean
 import org.scalaide.util.internal.ui.DisplayThread
+import org.scalaide.util.internal.eclipse.SWTUtils
 
 object CompilerLaunchErrorHandler {
 
@@ -34,7 +35,7 @@ class CompilerLaunchErrorHandler extends RichStatusHandler {
 
       if (!ScalaPlugin.plugin.headlessMode) {
         val dialog = new MD(
-          FromScalaPlugin.getShell,
+          SWTUtils.getShell,
           "Detected problem",
           null,
           status.getMessage + " Continue launch?",

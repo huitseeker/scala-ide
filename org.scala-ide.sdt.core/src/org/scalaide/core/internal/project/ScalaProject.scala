@@ -52,6 +52,10 @@ import org.eclipse.core.runtime.NullProgressMonitor
 import org.scalaide.core.internal.jdt.util.ClasspathContainerSetter
 import org.scalaide.core.ScalaConstants
 import org.scalaide.core.FromScalaPlugin
+import org.eclipse.core.runtime.CoreException
+import org.scalaide.util.internal.eclipse.SWTUtils
+import org.scalaide.util.internal.eclipse.EclipseUtils
+import org.scalaide.util.internal.eclipse.FileUtils
 
 trait BuildSuccessListener {
   def buildSuccessful(): Unit
@@ -98,6 +102,22 @@ object ScalaProject {
       }
     }
   }
+
+  /**
+   * Return true if the given Java project is also a Scala project, false othrerwise.
+   */
+  def isScalaProject(project: IJavaProject): Boolean =
+    (project ne null) && isScalaProject(project.getProject)
+
+  /**
+   * Return true if the given project is a Scala project, false othrerwise.
+   */
+  def isScalaProject(project: IProject): Boolean =
+    try {
+      project != null && project.isOpen && project.hasNature(ScalaConstants.NatureId)
+    } catch {
+      case _: CoreException => false
+    }
 }
 
 class ScalaProject private (val underlying: IProject) extends ClasspathManagement with HasLogger {
@@ -123,11 +143,11 @@ class ScalaProject private (val underlying: IProject) extends ClasspathManagemen
    */
   private def init(): Unit = {
     if (!ScalaPlugin.plugin.headlessMode)
-      FromScalaPlugin.getWorkbenchWindow map (_.getPartService().addPartListener(worbenchPartListener))
+      SWTUtils.getWorkbenchWindow map (_.getPartService().addPartListener(worbenchPartListener))
   }
 
   /** Does this project have the Scala nature? */
-  def hasScalaNature: Boolean = FromScalaPlugin.isScalaProject(underlying)
+  def hasScalaNature: Boolean = ScalaProject.isScalaProject(underlying)
 
   private def settingsError(severity: Int, msg: String, monitor: IProgressMonitor): Unit = {
     val mrk = underlying.createMarker(ScalaConstants.SettingProblemMarkerId)
@@ -176,7 +196,7 @@ class ScalaProject private (val underlying: IProject) extends ClasspathManagemen
     for {
       entry <- resolvedClasspath
       if entry.getEntryKind == IClasspathEntry.CPE_PROJECT && entry.isExported
-    } yield FromScalaPlugin.workspaceRoot.getProject(entry.getPath().toString)
+    } yield EclipseUtils.workspaceRoot.getProject(entry.getPath().toString)
   }
 
   lazy val javaProject: IJavaProject = JavaCore.create(underlying)
@@ -184,7 +204,7 @@ class ScalaProject private (val underlying: IProject) extends ClasspathManagemen
   def sourceFolders: Seq[IPath] = {
     for {
       cpe <- resolvedClasspath if cpe.getEntryKind == IClasspathEntry.CPE_SOURCE
-      resource <- Option(FromScalaPlugin.workspaceRoot.findMember(cpe.getPath)) if resource.exists
+      resource <- Option(EclipseUtils.workspaceRoot.findMember(cpe.getPath)) if resource.exists
     } yield resource.getLocation
   }
 
@@ -210,12 +230,12 @@ class ScalaProject private (val underlying: IProject) extends ClasspathManagemen
 
     for {
       cpe <- cpes if cpe.getEntryKind == IClasspathEntry.CPE_SOURCE
-      source <- Option(FromScalaPlugin.workspaceRoot.findMember(cpe.getPath)) if source.exists
+      source <- Option(EclipseUtils.workspaceRoot.findMember(cpe.getPath)) if source.exists
     } yield {
       val cpeOutput = cpe.getOutputLocation
       val outputLocation = if (cpeOutput != null) cpeOutput else javaProject.getOutputLocation
 
-      val wsroot = FromScalaPlugin.workspaceRoot
+      val wsroot = EclipseUtils.workspaceRoot
       val binPath = wsroot.getFolder(outputLocation) // may not exist
 
       (source.asInstanceOf[IContainer], binPath)
@@ -243,7 +263,7 @@ class ScalaProject private (val underlying: IProject) extends ClasspathManagemen
    *  Java or Scala sources).
    */
   def allSourceFiles(): Set[IFile] = {
-    allFilesInSourceDirs() filter (f => FromScalaPlugin.isBuildable(f.getName))
+    allFilesInSourceDirs() filter (f => FileUtils.isBuildable(f.getName))
   }
 
   /** Return all the files in the current project. It walks all source entries in the classpath
@@ -287,7 +307,7 @@ class ScalaProject private (val underlying: IProject) extends ClasspathManagemen
     for {
       srcEntry <- javaProject.getResolvedClasspath(true)
       if srcEntry.getEntryKind() == IClasspathEntry.CPE_SOURCE
-      srcFolder = FromScalaPlugin.workspaceRoot.findMember(srcEntry.getPath())
+      srcFolder = EclipseUtils.workspaceRoot.findMember(srcEntry.getPath())
       if srcFolder ne null
     } {
       val inclusionPatterns = fullPatternChars(srcEntry, srcEntry.getInclusionPatterns())
@@ -356,7 +376,7 @@ class ScalaProject private (val underlying: IProject) extends ClasspathManagemen
       }
 
     val outputLocation = javaProject.getOutputLocation
-    val resource = FromScalaPlugin.workspaceRoot.findMember(outputLocation)
+    val resource = EclipseUtils.workspaceRoot.findMember(outputLocation)
     resource match {
       case container: IContainer => delete(container, container != javaProject.getProject)(_.endsWith(".class"))
       case _ =>
@@ -377,7 +397,7 @@ class ScalaProject private (val underlying: IProject) extends ClasspathManagemen
   // TODO Per-file encodings
   private def encoding: Option[String] =
     sourceFolders.headOption flatMap { path =>
-      FromScalaPlugin.workspaceRoot.findContainersForLocation(path) match {
+      EclipseUtils.workspaceRoot.findContainersForLocation(path) match {
         case Array(container) => Some(container.getDefaultCharset)
         case _ => None
       }
@@ -764,7 +784,7 @@ class ScalaProject private (val underlying: IProject) extends ClasspathManagemen
     }
 
     if (!ScalaPlugin.plugin.headlessMode)
-      FromScalaPlugin.getWorkbenchWindow map (_.getPartService().removePartListener(worbenchPartListener))
+      SWTUtils.getWorkbenchWindow map (_.getPartService().removePartListener(worbenchPartListener))
     shutDownCompilers()
   }
 

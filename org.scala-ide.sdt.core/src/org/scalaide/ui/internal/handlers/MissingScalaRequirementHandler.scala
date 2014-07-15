@@ -16,6 +16,7 @@ import org.scalaide.core.internal.project.Nature
 import org.scalaide.core.internal.project.ScalaProject
 import org.scalaide.util.internal.Utils
 import org.scalaide.util.internal.ui.DisplayThread
+import org.scalaide.util.internal.eclipse.SWTUtils
 
 object MissingScalaRequirementHandler {
 
@@ -31,7 +32,7 @@ class MissingScalaRequirementHandler extends RichStatusHandler {
 
   def doHandleStatus(status: IStatus, source: Object) = {
     val scalaPc = source.asInstanceOfOpt[ScalaPresentationCompilerProxy]
-    val shell = FromScalaPlugin.getShell
+    val shell = SWTUtils.getShell
     val title = "Add Scala library to project classpath?"
 
     val msg = status.getMessage()

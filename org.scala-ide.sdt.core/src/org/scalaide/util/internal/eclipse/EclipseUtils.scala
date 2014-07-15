@@ -165,4 +165,7 @@ object EclipseUtils {
     def /(other: IPath): IPath =
       p append other
   }
+
+  def workspaceRoot = ResourcesPlugin.getWorkspace.getRoot
+
 }

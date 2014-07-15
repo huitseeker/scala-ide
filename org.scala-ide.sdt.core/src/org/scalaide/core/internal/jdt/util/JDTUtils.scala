@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart
 import org.eclipse.ui.progress.UIJob
 import org.scalaide.core.FromScalaPlugin
 import org.scalaide.util.internal.ReflectionUtils
+import org.scalaide.core.internal.project.ScalaProject
 
 object JDTUtils {
   private var refreshPending = false
@@ -72,7 +73,7 @@ object JDTUtils {
 
   def flattenProject(project : IProject) : Iterator[IFile] = {
     try {
-      if (!FromScalaPlugin.isScalaProject(project))
+      if (!ScalaProject.isScalaProject(project))
         return Iterator.empty
 
       val jp = JavaCore.create(project)

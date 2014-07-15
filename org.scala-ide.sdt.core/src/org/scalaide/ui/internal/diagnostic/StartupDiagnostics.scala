@@ -9,17 +9,18 @@ import org.eclipse.jface.preference.IPreferenceStore
 import org.scalaide.core.FromScalaPlugin
 import org.scalaide.core.ScalaConstants
 import org.scalaide.core.ScalaPlugin
+import org.scalaide.util.internal.eclipse.SWTUtils
 
 
 object MessageDialog {
   import org.eclipse.jface.dialogs.{ MessageDialog => JFMessageDialog }
   import org.eclipse.swt.widgets.Shell
   def apply(heading: String, message: String, labels: (Int, String)*) =
-    new JFMessageDialog(FromScalaPlugin.getShell, heading, null, message, JFMessageDialog.QUESTION, labels.map(_._2).toArray, 0).open()
+    new JFMessageDialog(SWTUtils.getShell, heading, null, message, JFMessageDialog.QUESTION, labels.map(_._2).toArray, 0).open()
   def confirm(heading: String, message: String) =
-    JFMessageDialog.openConfirm(FromScalaPlugin.getShell, heading, message)
+    JFMessageDialog.openConfirm(SWTUtils.getShell, heading, message)
   def question(heading: String, message: String) =
-    JFMessageDialog.openQuestion(FromScalaPlugin.getShell, heading, message)
+    JFMessageDialog.openQuestion(SWTUtils.getShell, heading, message)
   val CLOSE_ACTION = -1
 }
 
@@ -56,7 +57,7 @@ object StartupDiagnostics extends HasLogger {
              |Run setup diagnostics to ensure correct plugin settings?""".stripMargin,
           YES_ACTION -> YES_LABEL, NO_ACTION -> NO_LABEL, NEVER_ACTION -> "Never") match {
             case YES_ACTION =>
-              new DiagnosticDialog(weavingState, FromScalaPlugin.getShell).open
+              new DiagnosticDialog(weavingState, SWTUtils.getShell).open
             case NEVER_ACTION =>
               prefStore.setValue(ASK_DIAGNOSTICS, false)
             case NO_ACTION | CLOSE_ACTION =>

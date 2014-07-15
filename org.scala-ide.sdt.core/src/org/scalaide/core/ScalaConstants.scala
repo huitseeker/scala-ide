@@ -10,6 +10,8 @@ object ScalaConstants {
   
   final val PluginId = "org.scala-ide.sdt.core"
   final val LibraryPluginId = "org.scala-lang.scala-library"
+  final val SbtPluginId = "org.scala-ide.sbt.full.library"
+  final val SbtCompilerInterfacePluginId = "org.scala-ide.sbt.compiler.interface"
 
   final val LaunchTypeId = "scala.application"
 
@@ -46,7 +48,6 @@ object ScalaConstants {
   
   final val ScalaFileExtn = ".scala"
   final val JavaFileExtn = ".java"
-//  val jarFileExtn = ".jar"
 
   final val IssueTracker = "https://www.assembla.com/spaces/scala-ide/support/tickets"
 

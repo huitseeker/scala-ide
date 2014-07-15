@@ -73,12 +73,10 @@ class ScalaPlugin extends org.scalaide.core.ScalaPlugin with PluginLogConfigurat
   
   import org.scalaide.core.ScalaConstants._
 
-  def sbtPluginId = "org.scala-ide.sbt.full.library"
-  lazy val sbtCompilerInterfaceId = "org.scala-ide.sbt.compiler.interface"
-
-
-  def editorId = "scala.tools.eclipse.ScalaSourceFileEditor"
-
+//
+//
+//  def editorId = "scala.tools.eclipse.ScalaSourceFileEditor"
+//
    /** Check if the given version is compatible with the current plug-in version.
    *  Check on the major/minor number, discard the maintenance number.
    *
@@ -92,14 +90,11 @@ class ScalaPlugin extends org.scalaide.core.ScalaPlugin with PluginLogConfigurat
       isBinarySame(ScalaVersion.current, version)// don't treat 2 unknown versions as equal
   }
 
-  lazy val sdtCoreBundle = getBundle()
+  private lazy val sdtCoreBundle = getBundle()
 
-  lazy val sbtCompilerBundle = Platform.getBundle(sbtPluginId)
-  lazy val sbtCompilerInterfaceBundle = Platform.getBundle(sbtCompilerInterfaceId)
+  lazy val sbtCompilerBundle = Platform.getBundle(SbtPluginId)
+  lazy val sbtCompilerInterfaceBundle = Platform.getBundle(SbtCompilerInterfacePluginId)
   lazy val sbtCompilerInterface = OSGiUtils.pathInBundle(sbtCompilerInterfaceBundle, "/")
-  // Disable for now, until we introduce a way to have multiple scala libraries, compilers available for the builder
-  //lazy val sbtScalaLib = pathInBundle(sbtCompilerBundle, "/lib/scala-" + shortScalaVer + "/lib/scala-library.jar")
-  //lazy val sbtScalaCompiler = pathInBundle(sbtCompilerBundle, "/lib/scala-" + shortScalaVer + "/lib/scala-compiler.jar")
 
   lazy val templateManager = new ScalaTemplateManager()
   
@@ -109,7 +104,7 @@ class ScalaPlugin extends org.scalaide.core.ScalaPlugin with PluginLogConfigurat
     super.start(context)
 
     if (!headlessMode) {
-      PlatformUI.getWorkbench.getEditorRegistry.setDefaultEditor("*.scala", editorId)
+//      PlatformUI.getWorkbench.getEditorRegistry.setDefaultEditor("*.scala", editorId)
       diagnostic.StartupDiagnostics.run
     }
     ResourcesPlugin.getWorkspace.addResourceChangeListener(this, IResourceChangeEvent.PRE_CLOSE)

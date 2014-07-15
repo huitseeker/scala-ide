@@ -105,4 +105,19 @@ object FileUtils {
       dir.delete()
     }
   }
+
+  /** Is the file buildable by the Scala plugin? In other words, is it a
+   *  Java or Scala source file?
+   *
+   *  @note If you don't have an IFile yet, prefer the String overload, as
+   *        creating an IFile is usually expensive
+   */
+  def isBuildable(file: IFile): Boolean =
+    isBuildable(file.getName())
+
+  /** Is the file buildable by the Scala plugin? In other words, is it a
+   *  Java or Scala source file?
+   */
+  def isBuildable(fileName: String): Boolean =
+    (fileName.endsWith(ScalaConstants.ScalaFileExtn) || fileName.endsWith(ScalaConstants.JavaFileExtn))
 }

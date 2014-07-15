@@ -45,7 +45,7 @@ trait ScalaPlugin extends AbstractUIPlugin with HasLogger {
    * Return Some(ScalaProject) if the project has the Scala nature, None otherwise.
    */
   def asScalaProject(project: IProject): Option[ScalaProject] = {
-    if (FromScalaPlugin.isScalaProject(project)) {
+    if (ScalaProject.isScalaProject(project)) {
       Some(getScalaProject(project))
     } else {
       logger.debug("`%s` is not a Scala Project.".format(project.getName()))

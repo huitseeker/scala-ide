@@ -5,12 +5,12 @@ import scala.collection.mutable.WeakHashMap
 import org.scalaide.core.FromScalaPlugin
 import scala.tools.eclipse.contribution.weaving.jdt.cfprovider.IClassFileProvider
 import org.scalaide.logging.HasLogger
-
 import org.eclipse.jdt.core.IClassFile
 import org.eclipse.jdt.core.IJavaElement
 import org.eclipse.jdt.core.IPackageFragmentRoot
 import org.eclipse.jdt.internal.core.ClassFile
 import org.eclipse.jdt.internal.core.PackageFragment
+import org.scalaide.core.internal.project.ScalaProject
 
 class ScalaClassFileProvider extends IClassFileProvider with HasLogger {
 
@@ -44,7 +44,7 @@ class ScalaClassFileProvider extends IClassFileProvider with HasLogger {
    *        is comes from Java, a plain Java classfile editor and icon would be used for all classfiles in that jar.
    */
   override def isInteresting(classFile: IClassFile): Boolean = {
-    if (FromScalaPlugin.isScalaProject(classFile.getJavaProject)) {
+    if (ScalaProject.isScalaProject(classFile.getJavaProject)) {
       val pfr = ancestorFragmentRoot(classFile)
       // synchronized needed for visibility
       scalaPackageFragments.synchronized {

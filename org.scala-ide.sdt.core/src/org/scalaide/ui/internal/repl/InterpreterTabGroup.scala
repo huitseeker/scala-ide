@@ -19,6 +19,7 @@ import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants
 import org.scalaide.core.FromScalaPlugin
 import org.scalaide.logging.HasLogger
 import org.scalaide.core.internal.repl.InterpreterLaunchConstants
+import org.scalaide.core.internal.project.ScalaProject
 
 /**
  * This defines the configuration UI for a scala interpeter launch configuration.
@@ -154,7 +155,7 @@ class InterpreterMainTab extends JavaLaunchTab with HasLogger {
     dialog.setTitle("Select a Scala Project");
     dialog.setMessage("");
     try {
-      val scalaProjects = JavaCore.create(getWorkspaceRoot).getJavaProjects.filter(FromScalaPlugin.isScalaProject).toArray[Object]
+      val scalaProjects = JavaCore.create(getWorkspaceRoot).getJavaProjects.filter(ScalaProject.isScalaProject).toArray[Object]
       dialog.setElements(scalaProjects)
     }
     catch {

@@ -17,6 +17,7 @@ import scala.concurrent.Promise
 import scala.tools.nsc.settings.ScalaVersion
 import org.scalaide.ui.internal.preferences.CompilerSettings
 import org.scalaide.core.FromScalaPlugin
+import org.scalaide.util.internal.eclipse.SWTUtils
 
 object ClasspathErrorPromptStatusHandler {
 
@@ -36,7 +37,7 @@ class ClasspathErrorPromptStatusHandler extends RichStatusHandler {
       case (_, c: Promise[()=> Unit]) => (None, Some(c))
       case _ => (None, None)
     }
-    val shell = FromScalaPlugin.getShell
+    val shell = SWTUtils.getShell
 
     val title = "Prior Scala library version detected in this project"
     val expectedVer = ScalaPlugin.plugin.scalaVersion.unparse

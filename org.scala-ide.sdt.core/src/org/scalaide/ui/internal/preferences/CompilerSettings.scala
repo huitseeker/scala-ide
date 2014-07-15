@@ -53,6 +53,7 @@ import scala.tools.nsc.settings.Final
 import org.eclipse.jface.preference.StringFieldEditor
 import org.scalaide.core.ScalaConstants
 import org.scalaide.core.FromScalaPlugin
+import org.scalaide.util.internal.eclipse.EclipseUtils
 
 trait ScalaPluginPreferencePage extends HasLogger {
   self: PreferencePage with EclipseSettings =>
@@ -294,7 +295,7 @@ class CompilerSettings extends PropertyPage with IWorkbenchPreferencePage with E
         val plugin = ScalaPlugin.plugin
 
         for {
-          p <- (FromScalaPlugin.workspaceRoot.getProjects())
+          p <- (EclipseUtils.workspaceRoot.getProjects())
           scalaProject <- plugin.asScalaProject(p)
           if !scalaProject.usesProjectSettings
         } yield scalaProject.underlying
