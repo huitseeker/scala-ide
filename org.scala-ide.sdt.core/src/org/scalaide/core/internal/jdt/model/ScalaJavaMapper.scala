@@ -51,7 +51,7 @@ trait ScalaJavaMapper extends InternalCompilerServices with ScalaAnnotationHelpe
     } else if (sym.isClass || sym.isModule) {
       val fullClassName = javaTypeName(sym)
       val results = projects.map(p => Option(p.findType(fullClassName)))
-      results.find(_.isDefined).flatten.headOption
+      results.find(_.isDefined).flatten
     } else getJavaElement(sym.owner, projects: _*) match {
         case Some(ownerClass: IType) =>
           def isGetterOrSetter: Boolean = sym.isGetter || sym.isSetter

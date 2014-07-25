@@ -48,8 +48,6 @@ import org.scalaide.core.compiler.IScalaPresentationCompiler.Implicits._
 import org.scalaide.core.compiler._
 import org.scalaide.core.compiler.IScalaPresentationCompiler._
 import org.scalaide.core.internal.compiler.Scaladoc
-import org.scalaide.core.internal.compiler.ScaladocGlobalCompatibilityTrait
-import org.scalaide.core.internal.compiler.ScaladocEnabledGlobal
 
 class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) extends {
   /*

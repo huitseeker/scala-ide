@@ -17,7 +17,6 @@ import org.eclipse.jdt.core.IJavaElement
 
 trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPresentationCompiler =>
   val global: this.type = this
-  import global._
 
   // @see the corresponding member in
   // src/scaladoc/scala/tools/nsc/doc/ScaladocAnalyzer.scala
@@ -62,7 +61,7 @@ trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPre
         }
 
         asyncExec {
-          if (sym.owner.isPackage) sym.baseClasses else sym::sym.allOverriddenSymbols:::site.baseClasses
+          if (sym.owner.hasPackageFlag) sym.baseClasses else sym::sym.allOverriddenSymbols:::site.baseClasses
         } .getOption()flatMap { syms =>
           withFragments(listFragments(syms)) flatMap {
             case (expanded, raw, pos) if !expanded.isEmpty =>
@@ -175,7 +174,7 @@ trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPre
 class BrowserInput(@BeanProperty val html: String,
                    @BeanProperty val inputElement: Object,
                    @BeanProperty val inputName: String) extends BrowserInformationControlInput(null) {
-  @deprecated("use BrowserInput(html:String, sym:IJavaElement), see ScalaJavaMapper.getJavaElement")
+  @deprecated("use BrowserInput(html:String, sym:IJavaElement), see ScalaJavaMapper.getJavaElement", "4.0.0")
   def this(html: String, sym:Symbol) = this(html, sym, sym.toString)
   def this(html: String, sym: IJavaElement) = this(html, sym, sym.toString)
 }

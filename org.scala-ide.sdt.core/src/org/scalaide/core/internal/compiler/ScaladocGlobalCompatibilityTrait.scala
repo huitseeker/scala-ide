@@ -5,7 +5,6 @@ import scala.tools.nsc.interactive
 import scala.tools.nsc.doc.{ScaladocGlobalTrait => _, _}
 import scala.tools.nsc.symtab.BrowsingLoaders
 import scala.tools.nsc.interactive.InteractiveReporter
-import scala.tools.nsc.typechecker.Analyzer
 import scala.tools.nsc.interactive.CommentPreservingTypers
 
 trait InteractiveScaladocAnalyzer extends interactive.InteractiveAnalyzer with ScaladocAnalyzer {
