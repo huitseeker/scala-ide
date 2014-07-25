@@ -73,7 +73,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
     ScalaWordFinder.findWord(viewer.getDocument, offset)
   }
 
-  override def getHoverControlCreator() = new IInformationControlCreator {
+  override def getHoverControlCreator(): IInformationControlCreator = new IInformationControlCreator {
     def createInformationControl(shell: Shell) = new DefaultInformationControl(shell, false)
   }
 }
