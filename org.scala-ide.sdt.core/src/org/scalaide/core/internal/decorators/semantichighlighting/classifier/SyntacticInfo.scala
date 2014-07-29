@@ -62,7 +62,7 @@ object SyntacticInfo {
             }
           }
           val selfRefTokenOpt = findAscriptionExpr(selfRefExpr) match {
-            case Some(AscriptionExpr(left, _, _)) => left.flatMap(_.tokens).find(_.tokenType.isId).headOption
+            case Some(AscriptionExpr(left, _, _)) => left.flatMap(_.tokens).find(_.tokenType.isId)
             case None => selfRefExpr.tokens.headOption
           }
           for {

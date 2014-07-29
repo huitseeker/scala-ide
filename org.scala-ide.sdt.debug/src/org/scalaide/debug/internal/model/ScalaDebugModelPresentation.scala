@@ -16,6 +16,8 @@ import org.eclipse.ui.IEditorInput
 import org.eclipse.jface.viewers.ILabelProviderListener
 import org.eclipse.debug.core.model.IVariable
 import scala.util.Try
+import java.io.StringWriter
+import java.io.PrintWriter
 
 /**
  * Utility methods for the ScalaDebugModelPresentation class
@@ -70,8 +72,11 @@ object ScalaDebugModelPresentation {
           "null"
       }
     } catch {
-      case e: Exception =>
-        "exception while invoking toString(): %s\n%s".format(e.getMessage(), e.getStackTrace)
+      case e: Exception => {
+        val sw = new StringWriter()
+        e.printStackTrace(new PrintWriter(sw))
+        "exception while invoking toString(): %s\n%s".format(e.getMessage(), sw.toString())
+      }
     }
   }
 

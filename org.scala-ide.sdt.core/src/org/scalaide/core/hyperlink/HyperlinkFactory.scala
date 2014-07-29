@@ -3,7 +3,6 @@ package org.scalaide.core.hyperlink
 import org.eclipse.jface.text.IRegion
 import org.eclipse.jface.text.hyperlink.IHyperlink
 import org.scalaide.core.compiler.ScalaPresentationCompiler
-import org.scalaide.core.compiler.InteractiveCompilationUnit
 
 /** A factory that builds IHyperlink instances from compiler Symbols.
  *

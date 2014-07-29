@@ -63,7 +63,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
       }
 
       val wordPos = region.toRangePos(src)
-      val pos = {val pTree = locateTree(wordPos); if (pTree.hasSymbol) pTree.pos else wordPos}
+      val pos = {val pTree = locateTree(wordPos); if (pTree.hasSymbolField) pTree.pos else wordPos}
       val resp = new Response[Tree]
       askTypeAt(pos, resp)
       resp.get.left.toOption flatMap hoverInfo getOrElse NoHoverInfo

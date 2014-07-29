@@ -43,8 +43,6 @@ import org.scalaide.core.ScalaPlugin
 import org.scalaide.util.internal.ScalaWordFinder
 import scalariform.lexer.{ScalaLexer, ScalaLexerException}
 import org.scalaide.core.Scaladoc
-import org.scalaide.core.compiler.ScaladocGlobalCompatibilityTrait
-import org.scalaide.core.compiler.ScaladocEnabledGlobal
 
 class ScalaPresentationCompiler(val project: ScalaProject, settings: Settings) extends {
   /*

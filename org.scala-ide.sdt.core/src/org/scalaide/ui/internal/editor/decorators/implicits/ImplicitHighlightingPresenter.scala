@@ -30,7 +30,7 @@ class ImplicitHighlightingPresenter(sourceViewer: ISourceViewer)
     Some("implicit")) {
 
   protected override def findAll(compiler: ScalaPresentationCompiler, scu: ScalaCompilationUnit, sourceFile: SourceFile): Map[Annotation, Position] =
-    ImplicitHighlightingPresenter.findAllImplicitConversions(compiler, scu, sourceFile)
+    ImplicitHighlightingPresenter.findAllImplicitConversions(compiler, sourceFile)
 }
 
 object ImplicitHighlightingPresenter {
@@ -38,7 +38,7 @@ object ImplicitHighlightingPresenter {
 
   private def pluginStore: IPreferenceStore = ScalaPlugin.plugin.getPreferenceStore
 
-  def findAllImplicitConversions(compiler: ScalaPresentationCompiler, scu: ScalaCompilationUnit, sourceFile: SourceFile) = {
+  def findAllImplicitConversions(compiler: ScalaPresentationCompiler, sourceFile: SourceFile) = {
     import compiler.Tree
     import compiler.Traverser
     import compiler.Apply

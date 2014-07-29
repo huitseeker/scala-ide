@@ -133,12 +133,12 @@ object MissingMemberInfo {
           }
         })
       }.flatten
-      optopt.flatten.orElse(Some(Nil, None))
+      optopt.flatten.orElse(Some((Nil, None)))
     }
 
     val result = for (MethodCallInfo(offset, length, argPosition) <- ScalariformUtils.callingOffsetAndLength(source, offset)) yield {
       getParamsAndReturnType(offset, length, argPosition)
     }
-    result.flatten.getOrElse(Nil,None)
+    result.flatten.getOrElse((Nil,None))
   }
 }

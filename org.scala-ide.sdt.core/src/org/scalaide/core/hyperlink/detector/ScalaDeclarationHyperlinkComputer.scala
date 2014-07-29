@@ -60,7 +60,7 @@ class ScalaDeclarationHyperlinkComputer extends HasLogger {
               case st if st.symbol ne null                          => List(st.symbol)
               case _                                                => List()
             }
-            syms filterNot { sym => sym == NoSymbol || sym.isPackage || sym.isJavaDefined }
+            syms filterNot { sym => sym == NoSymbol || sym.hasPackageFlag || sym.isJavaDefined }
           }
         }
         symsOpt map { syms =>

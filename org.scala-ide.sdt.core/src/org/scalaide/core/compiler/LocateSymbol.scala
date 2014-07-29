@@ -29,7 +29,7 @@ trait LocateSymbol { self : ScalaPresentationCompiler =>
   def findCompilationUnit(sym: Symbol) : Option[InteractiveCompilationUnit]= {
 
     def enclosingClassForScalaDoc(sym:Symbol): Symbol = {
-      if ((sym.isClass || sym.isModule) && sym.isPackage) sym else sym.enclosingPackageClass
+      if ((sym.isClass || sym.isModule) && sym.hasPackageFlag) sym else sym.enclosingPackageClass
     }
 
     def symClassName(sym: Symbol): Option[String] = askOption { () =>
