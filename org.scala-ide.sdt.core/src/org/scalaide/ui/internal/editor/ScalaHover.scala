@@ -25,15 +25,17 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
   override def getHoverInfo(viewer: ITextViewer, region: IRegion): String = null
 
   override def getHoverInfo2(viewer: ITextViewer, region: IRegion): Object =
-    icu.withSourceFile({ (src, compiler) =>
+    (icu.withSourceFile({ (src, compiler) =>
       import compiler.{stringToTermName => _, stringToTypeName => _, _}
 
       def hoverInfo(t: Tree): Option[Object] = {
         val askedOpt = askOption { () =>
           def compose(ss: List[String]): String = ss.filterNot(_.isEmpty).mkString(" ")
           def defString(sym: Symbol, tpe: Type): String = {
+            // NoType is returned for defining occurrences, in this case we want to display symbol info itself.
+            val tpeinfo = if (tpe ne NoType) tpe.widen else sym.info
             compose(List(sym.flagString(Flags.ExplicitFlags), sym.keyString, sym.varianceString + sym.nameString +
-              sym.infoString(tpe)))
+              sym.infoString(tpeinfo)))
           }
 
           def pre(tsym: Symbol, t: Tree): Type = t match {
@@ -47,7 +49,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
             pt <- Option(pre(tsym,t))) yield {
             val site = pt.typeSymbol
             val sym = if(tsym.isCaseApplyOrUnapply) site else tsym
-            val header = if (sym.isClass || sym.isModule) sym.nameString else {
+            val header = if (sym.isClass || sym.isModule) sym.fullNameString else {
               val tpe = sym.tpe.asSeenFrom(pt.widen, site)
               defString(sym, tpe)
             }
@@ -66,8 +68,8 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
       val pos = {val pTree = locateTree(wordPos); if (pTree.hasSymbolField) pTree.pos else wordPos}
       val resp = new Response[Tree]
       askTypeAt(pos, resp)
-      resp.get.left.toOption flatMap hoverInfo getOrElse NoHoverInfo
-    }) getOrElse (NoHoverInfo)
+      resp.get.left.toOption flatMap hoverInfo
+    }) flatten) orNull //getHoverInfo2 returns null on no Hover
 
   override def getHoverRegion(viewer: ITextViewer, offset: Int) = {
     ScalaWordFinder.findWord(viewer.getDocument, offset)
