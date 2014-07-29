@@ -79,9 +79,9 @@ trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPre
   }
 
   def browserInput(sym: Symbol, site: Symbol, header: String = ""): Option[BrowserInput] = {
-    logger.info("Computing documentation for: " + sym)
+    logger.info(s"Computing documentation for: $sym at $site")
     val comment = parsedDocComment(sym, site)
-    logger.info("retrieve documentation result: " + comment)
+    logger.info("retrieve documentation result: $comment")
 
     askOption { () =>
       comment map (HtmlProducer(_, sym, header))

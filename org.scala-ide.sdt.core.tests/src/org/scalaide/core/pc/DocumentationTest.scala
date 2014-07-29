@@ -34,6 +34,14 @@ class PresentationCompilerDocTest {
   }
 
   @Test
+  def parametricComment() {
+    val expect: Comment => Boolean = { cmt =>
+      existsText(cmt.todo, "implement me")
+    }
+    doTest(open("parametric.scala"), expect)
+  }
+
+  @Test
   def variableExpansion() {
     val expect: Comment => Boolean = { cmt =>
       existsText(cmt.body, "correctly got derived comment")
