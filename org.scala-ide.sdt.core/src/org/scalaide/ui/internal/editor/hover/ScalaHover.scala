@@ -119,11 +119,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
 
       def typeInfo(t: Tree): Option[Object] = {
         val askedOpt = asyncExec {
-          def compose(ss: List[String]): String = ss.filterNot(_.isEmpty).mkString(" ")
-          def defString(sym: Symbol, tpe: Type): String = {
-            compose(List(sym.flagString(Flags.ExplicitFlags), sym.keyString, sym.varianceString + sym.nameString +
-              sym.infoString(tpe)))
-          }
+
           def pre(tsym: Symbol, t: Tree): Type = t match {
             case Apply(fun, _) => pre(tsym, fun)
             case Select(qual, _) => qual.tpe
@@ -136,10 +132,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
           ) yield {
             val site = pt.typeSymbol
             val sym = if (tsym.isCaseApplyOrUnapply) site else tsym
-            val header = if (sym.isClass || sym.isModule) sym.nameString else {
-              val tpe = sym.tpe.asSeenFrom(pt.widen, site)
-              defString(sym, tpe)
-            }
+            val header = headerForSymbol(sym, t.tpe)
             (sym, site, header)
           }
         }.getOption().flatten

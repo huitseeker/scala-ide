@@ -381,7 +381,12 @@ class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) 
       } else scalaParamNames
     }
 
-    def docFun = () => asyncExec{browserInput(sym, sym.enclClass)}.getOption().flatten // TODO: proper site. How?
+    def docFun() = asyncExec{
+      val header = headerForSymbol(sym, tpe)
+
+      logger.debug(s"About to make a Completion for $sym at $tpe with header $header")
+      browserInput(sym, sym.enclClass, header)
+    }.getOption()
 
     CompletionProposal(
       kind,

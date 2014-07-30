@@ -14,6 +14,7 @@ import scala.tools.nsc.interactive.Response
 import scala.reflect.api.Position
 import org.scalaide.core.compiler.IScalaPresentationCompiler.Implicits._
 import org.eclipse.jdt.core.IJavaElement
+import scala.reflect.internal.Flags
 
 trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPresentationCompiler =>
   val global: this.type = this
@@ -82,6 +83,22 @@ trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPre
     asyncExec{
       comment map (HtmlProducer(_, sym, header))
     }.getOption().flatten
+  }
+
+  def headerForSymbol(sym:Symbol, tpe: Type): String = {
+    def compose(ss: List[String]): String = ss.filterNot(_.isEmpty).mkString(" ")
+
+    def defString(sym: Symbol, tpe: Type): String = {
+      // NoType is returned for defining occurrences, in this case we want to display symbol info itself.
+      val tpeinfo = if (tpe ne NoType) tpe.widen else sym.info
+      compose(List(sym.flagString(Flags.ExplicitFlags), sym.keyString, sym.varianceString + sym.nameString +
+        sym.infoString(tpeinfo)))
+    }
+
+    if (sym.isClass || sym.isModule) sym.fullNameString else {
+      val tp = sym.tpe.asSeenFrom(tpe.widen, sym.enclClass)
+      defString(sym, tpe)
+    }
   }
 
   object HtmlProducer {
