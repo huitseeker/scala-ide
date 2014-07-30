@@ -423,7 +423,12 @@ class ScalaPresentationCompiler(val project: ScalaProject, settings: Settings) e
       } else scalaParamNames
     }
 
-    def docFun() = askOption{ () => browserInput(sym, sym.enclClass) }.getOrElse(None)
+    def docFun() = askOption{ () =>
+      val header = headerForSymbol(sym, tpe)
+
+      logger.debug(s"About to make a Completion for $sym at $tpe with header $header")
+      browserInput(sym, sym.enclClass, header)
+    }.getOrElse(None)
 
     CompletionProposal(
       kind,

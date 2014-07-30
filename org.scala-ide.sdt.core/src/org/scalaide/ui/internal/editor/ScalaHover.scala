@@ -30,13 +30,6 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
 
       def hoverInfo(t: Tree): Option[Object] = {
         val askedOpt = askOption { () =>
-          def compose(ss: List[String]): String = ss.filterNot(_.isEmpty).mkString(" ")
-          def defString(sym: Symbol, tpe: Type): String = {
-            // NoType is returned for defining occurrences, in this case we want to display symbol info itself.
-            val tpeinfo = if (tpe ne NoType) tpe.widen else sym.info
-            compose(List(sym.flagString(Flags.ExplicitFlags), sym.keyString, sym.varianceString + sym.nameString +
-              sym.infoString(tpeinfo)))
-          }
 
           def pre(tsym: Symbol, t: Tree): Type = t match {
             case Apply(fun, _) => pre(tsym, fun)
@@ -49,10 +42,7 @@ class ScalaHover(val icu: InteractiveCompilationUnit) extends ITextHover with IT
             pt <- Option(pre(tsym,t))) yield {
             val site = pt.typeSymbol
             val sym = if(tsym.isCaseApplyOrUnapply) site else tsym
-            val header = if (sym.isClass || sym.isModule) sym.fullNameString else {
-              val tpe = sym.tpe.asSeenFrom(pt.widen, site)
-              defString(sym, tpe)
-            }
+            val header = headerForSymbol(sym, t.tpe)
             (sym, site, header)
           }
         }.flatten
