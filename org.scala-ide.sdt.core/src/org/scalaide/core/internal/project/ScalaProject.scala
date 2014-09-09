@@ -226,7 +226,7 @@ class ScalaProject private (val underlying: IProject) extends ClasspathManagemen
     }
   }
 
-  protected def isUnderlyingValid = (underlying.exists() && underlying.isOpen)
+  protected def isUnderlyingValid = (underlying.exists() && underlying.isOpen && !underlying.isPhantom())
 
   /** This function checks that the underlying project is closed, if not, return the classpath, otherwise return Nil,
    *  so avoids throwing an exceptions.
