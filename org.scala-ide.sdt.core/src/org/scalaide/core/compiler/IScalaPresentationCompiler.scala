@@ -229,6 +229,13 @@ trait IScalaPresentationCompiler extends Global with CompilerApiExtensions with 
    */
   def parsedDocComment(sym: Symbol, site: Symbol, javaProject: IJavaProject): Option[Comment]
 
+  /** Return a type info string for a symbol and its type
+   *
+   *  @param sym      The symbol to return type info on
+   *  @param tpe      The symbol's type
+   */
+  def headerForSymbol(sym:Symbol, tpe:Type): Option[String]
+
   /** Create a Scala CompletionProposal. This method is the exit point from the compiler cake,
    *  extracting all the information needed from compiler Symbols and Types to present a completion
    *  option to the user.

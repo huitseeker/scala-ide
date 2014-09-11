@@ -382,7 +382,7 @@ class ScalaPresentationCompiler(name: String, settings: Settings) extends {
     }
     val docFun = () => {
       val comment = parsedDocComment(sym, sym.enclClass, project.javaProject)
-      val header = asyncExec{headerForSymbol(sym, tpe)}.getOption()
+      val header = headerForSymbol(sym, tpe)
       if (comment.isDefined) Some(HtmlProducer(comment.get, sym, header.getOrElse(""), project.javaProject)) else None
     }
 

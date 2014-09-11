@@ -75,7 +75,7 @@ trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPre
     res.flatten
   }
 
-  def headerForSymbol(sym:Symbol, tpe: Type): String = {
+  def headerForSymbol(sym:Symbol, tpe: Type): Option[String] = asyncExec{
     def compose(ss: List[String]): String = ss.filterNot(_.isEmpty).mkString(" ")
 
     def defString(sym: Symbol, tpe: Type): String = {
@@ -89,7 +89,7 @@ trait Scaladoc extends MemberLookupBase with CommentFactoryBase { this: ScalaPre
       val tp = sym.tpe.asSeenFrom(tpe.widen, sym.enclClass)
       defString(sym, tp)
     }
-  }
+  }.getOption()
 
   object HtmlProducer {
     def apply(comment: Comment, sym: Symbol, header: String, javaProject: IJavaProject) = {
