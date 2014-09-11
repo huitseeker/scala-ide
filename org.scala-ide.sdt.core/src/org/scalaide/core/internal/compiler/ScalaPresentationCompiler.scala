@@ -380,6 +380,11 @@ class ScalaPresentationCompiler(name: String, settings: Settings) extends {
         } getOrElse scalaParamNames
       } else scalaParamNames
     }
+    val docFun = () => {
+      val comment = parsedDocComment(sym, sym.enclClass, project.javaProject)
+      val header = asyncExec{headerForSymbol(sym, tpe)}.getOption()
+      if (comment.isDefined) Some(HtmlProducer(comment.get, sym, header.getOrElse(""), project.javaProject)) else None
+    }
 
     CompletionProposal(
       kind,
@@ -393,7 +398,8 @@ class ScalaPresentationCompiler(name: String, settings: Settings) extends {
       getParamNames,
       paramTypes,
       sym.fullName,
-      false)
+      false,
+      docFun)
   }
 
   override def inform(msg: String): Unit =
