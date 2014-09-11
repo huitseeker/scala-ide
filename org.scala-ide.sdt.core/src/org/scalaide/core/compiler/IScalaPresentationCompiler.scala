@@ -17,6 +17,7 @@ import org.eclipse.jdt.core.IJavaProject
 import org.scalaide.core.compiler._
 import org.scalaide.core.IScalaPlugin
 import org.scalaide.core.internal.compiler.InternalCompilerServices
+import scala.tools.nsc.doc.base.comment.Comment
 
 /** This interface provides access to Scala Presentation compiler services. Even though methods are inherited from
  *  `scala.tools.nsc.interactive.Global`, prefer the convenience methods offered in this trait.
@@ -211,6 +212,21 @@ trait IScalaPresentationCompiler extends Global with CompilerApiExtensions with 
    *                  is passed.
    */
   def getJavaElement(sym: Symbol, projects: IJavaProject*): Option[IJavaElement]
+
+  /** Return the compilation unit (Scala File) in which the symbol passed as an argument is defined.
+   *  This method is time-consuming and may trigger building the structure of many Scala files.
+   *
+   *  @param sym      The symbol to seek a compilation unit for.
+   */
+  def findCompilationUnit(sym: Symbol): Option[InteractiveCompilationUnit]
+
+  /** Return the parsed scaladoc comment available at the definition of a Scala symbol.
+   *
+   *  @param sym      The symbol to find documentation for.
+   *  @param site     The symbol which declaration contains the declaration of that member,
+   *                  often its enclosing class.
+   */
+  def parsedDocComment(sym: Symbol, site: Symbol): Option[Comment]
 
   /** Create a Scala CompletionProposal. This method is the exit point from the compiler cake,
    *  extracting all the information needed from compiler Symbols and Types to present a completion

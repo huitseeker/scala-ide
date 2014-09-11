@@ -18,7 +18,6 @@ import scala.reflect.internal.util.BatchSourceFile
 import scala.reflect.internal.util.Position
 import scala.reflect.internal.util.SourceFile
 import org.scalaide.core.completion.CompletionContext
-import org.scalaide.core.internal.jdt.model.ScalaCompilationUnit
 import org.scalaide.core.internal.jdt.search.ScalaIndexBuilder
 import org.scalaide.core.internal.jdt.model.ScalaJavaMapper
 import org.scalaide.core.internal.jdt.search.ScalaMatchLocator
@@ -58,7 +57,8 @@ class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) 
    */
   private val nameLock = new Object
 
-} with Global(settings, new ScalaPresentationCompiler.PresentationReporter, project.underlying.getName)
+} with ScaladocEnabledGlobal(settings, new ScalaPresentationCompiler.PresentationReporter, project.underlying.getName)
+  with ScaladocGlobalCompatibilityTrait
   with ScalaStructureBuilder
   with ScalaIndexBuilder
   with ScalaMatchLocator
@@ -68,7 +68,10 @@ class ScalaPresentationCompiler(val project: IScalaProject, settings: Settings) 
   with LocateSymbol
   with CompilerApiExtensions
   with IScalaPresentationCompiler
-  with HasLogger { self =>
+  with HasLogger
+  with Scaladoc { self =>
+
+  override def forScaladoc = true
 
   def presentationReporter = reporter.asInstanceOf[ScalaPresentationCompiler.PresentationReporter]
   presentationReporter.compiler = this
