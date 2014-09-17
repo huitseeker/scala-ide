@@ -42,7 +42,6 @@ trait LocateSymbol { self: ScalaPresentationCompiler =>
     }.getOption()
 
     def findClassFile(): Option[InteractiveCompilationUnit] = {
-      logger.debug("Looking for a classfile for " + sym.fullName)
       val packName = asyncExec { enclosingClassForScalaDoc(sym).fullName }.getOption()
 
       val name = symClassName(sym)
@@ -50,10 +49,9 @@ trait LocateSymbol { self: ScalaPresentationCompiler =>
         val pfs = new SearchableEnvironment(javaProject.asInstanceOf[JavaProject], null: WorkingCopyOwner).nameLookup.findPackageFragments(pn, false)
         name.flatMap { nm =>
           if (pfs eq null) None else pfs.toStream map
-            { pf => logger.debug("Trying out to get " + nm); pf.getClassFile(nm) } collectFirst
+            { pf => pf.getClassFile(nm) } collectFirst
             {
               case classFile: ScalaClassFile =>
-                logger.debug("Found Scala class file: " + classFile.getElementName)
                 classFile
             }
         }
@@ -61,13 +59,11 @@ trait LocateSymbol { self: ScalaPresentationCompiler =>
     }
 
     def findPath(): Option[IPath] = {
-      logger.info("Looking for a compilation unit for " + sym.fullName)
       val nameLookup = new SearchableEnvironment(javaProject.asInstanceOf[JavaProject], null: WorkingCopyOwner).nameLookup
 
       val name = asyncExec {
         if ((sym != NoSymbol) && sym.owner.isPackageObject) sym.owner.owner.fullName + ".package" else sym.enclosingTopLevelClass.fullName
       }.getOption()
-      logger.debug("Looking for compilation unit " + name)
       name.flatMap { n =>
         Option(nameLookup.findCompilationUnit(n)) map (_.getResource().getFullPath())
       }
